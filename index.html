@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4e79">
+<title>Vagt-app</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vagt-app">
+<meta name="application-name" content="Vagt-app">
+
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2733;--mut:#667385;--line:#dde3ea;--pri:#1f4e79;--pri2:#2f6db0;--warn:#b54708;--warnbg:#fff4e5;--err:#b42318;--errbg:#fdecea;--ok:#067647;--info:#175cd3;--infobg:#eaf2ff}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--pri);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+header h1{font-size:17px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .sub{font-size:12px;opacity:.85}
+nav.tabs{display:flex;gap:4px;background:#fff;border-bottom:1px solid var(--line);padding:4px 8px;position:sticky;top:52px;z-index:19;overflow-x:auto}
+nav.tabs button{border:0;background:none;padding:9px 12px;border-radius:8px;font-size:14px;color:var(--mut);cursor:pointer;white-space:nowrap}
+nav.tabs button.on{background:var(--infobg);color:var(--pri);font-weight:600}
+main{max-width:1100px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 10px}
+.card h3{font-size:14px;margin:14px 0 6px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grow{flex:1}
+button,.btn{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+button.pri,.btn.pri{background:var(--pri2);border-color:var(--pri2);color:#fff}
+button.danger{color:var(--err);border-color:#f3c3be}
+button.small,.btn.small{padding:4px 8px;font-size:13px}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);max-width:100%}
+textarea{width:100%;min-height:60px}
+label{font-size:13px;color:var(--mut);display:block}
+label.chk{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px;margin:4px 0}
+.monthbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.monthbar h2{margin:0;flex:1;text-align:center;font-size:18px;text-transform:capitalize}
+.cal{display:grid;grid-template-columns:28px repeat(7,minmax(0,1fr));gap:3px}
+.cal .hd{font-size:12px;color:var(--mut);text-align:center;padding:2px}
+.cal .wk{font-size:11px;color:var(--mut);display:flex;align-items:center;justify-content:center}
+.cal .d{background:#fff;border:1px solid var(--line);border-radius:8px;min-height:92px;padding:4px;cursor:pointer;position:relative;overflow:hidden}
+.cal .d.out{opacity:.4}
+.cal .d.today{outline:2px solid var(--pri2)}
+.cal .d.hol{background:#fff7f7}
+.cal .d .n{font-size:12px;font-weight:600}
+.cal .d .hn{font-size:10px;color:var(--err);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{display:block;font-size:11px;border-radius:5px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:4px solid;background:#f5f5f5}
+.chip .short{display:none}
+.badges{position:absolute;top:3px;right:4px;font-size:11px}
+.dv{display:inline-block;background:#7a5af8;color:#fff;border-radius:9px;padding:0 5px;font-size:10px}
+.wr{display:inline-block;color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px}
+.legend span{border-left:4px solid;padding:1px 6px;background:#fff;border-radius:4px}
+.list .day{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.list .day:hover{background:#fafbfc}
+.list .dt{width:74px;flex:none}
+.list .dt b{display:block;font-size:15px}
+.list .dt small{color:var(--mut)}
+.list .it{flex:1;min-width:0}
+.list .hrs{width:56px;text-align:right;color:var(--mut);flex:none}
+.muted{color:var(--mut)}
+.small{font-size:12px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px;vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bigbtn{display:block;text-align:center;font-size:20px;font-weight:600;padding:18px 14px;border-radius:12px;margin:14px 0 4px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.linklbl{display:inline !important;font-weight:600;color:var(--pri2);text-decoration:underline;cursor:pointer}
+#storeBanner{background:#fff4e5;color:#7a4b00;border:1px solid #f5c26b;border-radius:10px;padding:10px 12px;margin:0 0 10px;font-size:14px}
+.note{background:var(--infobg);color:#123a7a;border-radius:8px;padding:10px;font-size:13px}
+.warnbox{background:var(--warnbg);color:#7a2e0e;border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
+.infobox{background:var(--infobg);color:#123a7a;border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
+.errbox{background:var(--errbg);color:var(--err);border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
+.okbox{background:#ecfdf3;color:var(--ok);border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:30px 10px}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:14px;max-width:560px;width:100%;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.modal .box h2{margin:0 0 4px;font-size:18px}
+.devitem{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0;display:flex;gap:8px;align-items:flex-start}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.kpi b{display:block;font-size:20px}
+.kpi span{font-size:12px;color:var(--mut)}
+.prev td,.prev th{font-size:13px}
+.hide{display:none!important}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1d2733;color:#fff;padding:10px 16px;border-radius:10px;z-index:99;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width:640px){
+  main{padding:8px}
+  .cal{grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+  .cal .wk,.cal .hd.wkh{display:none}
+  .cal .d{min-height:64px;padding:2px;border-radius:6px}
+  .chip{font-size:9.5px;padding:0 2px;border-left-width:3px}
+  .chip .lbl,.chip .full{display:none}
+  .chip .short{display:inline}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .modal{padding:0}
+  .modal .box{border-radius:0;min-height:100%}
+  th,td{padding:5px 4px;font-size:13px}
+}
+@media print{
+  header,nav.tabs,.noprint,.toast{display:none!important}
+  body{background:#fff}
+  main{max-width:none;padding:0}
+  .card{border:0;padding:0}
+  .section{display:none!important}
+  .section.printme{display:block!important}
+}
+.grid2>div>span.small,.grid3>div>span.small{display:block;margin-top:2px}
+.vt{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;padding:0 4px;margin-right:3px;color:#fff;line-height:1.5;vertical-align:1px}
+.vt-dag{background:#dc6803}.vt-aften{background:#1570ef}.vt-nat{background:#344054}.vt-anden{background:#98a2b3}
+.chip .short .vt{font-size:8.5px;padding:0 2px;margin-right:1px}
+.pill-lok{display:inline-block;background:#e0eaff;color:#2d31a6;border:1px solid #a4bcfd;border-radius:999px;padding:0 7px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-warn{display:inline-block;background:#fef0c7;color:#93370d;border:1px solid #fec84b;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
+#tillaeg td,#tillaeg th{white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <div style="flex:1;min-width:0">
+    <h1>Vagt-app</h1>
+    <div class="sub" id="hdrSub">Mine vagter, afvigelser og tjek</div>
+  </div>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="kalender" class="on">Kalender</button>
+  <button data-tab="liste">Liste</button>
+  <button data-tab="oversigt">Oversigt</button>
+  <button data-tab="import">Import</button>
+  <button data-tab="indstillinger">Indstillinger</button>
+  <button data-tab="backup">Eksport &amp; backup</button>
+</nav>
+<main>
+<section class="section" id="sec-kalender">
+  <div id="storeBanner" class="hide"></div>
+  <div id="quickResult"></div>
+  <div class="card hide" id="startCard">
+    <h2 style="margin-top:0">Velkommen til Vagt-app</h2>
+    <p>Eksportér din vagtplan fra KMD Opus (filen ender på <b>.ics</b> eller <b>.csv</b>) og vælg den her. Vagterne bliver lagt direkte ind i kalenderen.</p>
+    <label for="quickFile" class="btn pri bigbtn" id="btnQuick" role="button">📅 Hent vagtplan fra KMD</label>
+    <p class="small muted" style="margin-top:12px">Filen kan ligge i <b>Filer/Downloads</b> eller være gemt fra en mail. Kan du ikke vælge filen? <label for="quickFileAny" class="linklbl">Vis alle filer</label>.</p>
+    <p class="small muted">Har du en backup-fil (.json)? Brug <b>Eksport &amp; backup → Gendan fra backup</b>.</p>
+  </div>
+  <input type="file" id="quickFile" accept=".ics,.csv,text/calendar,text/csv" class="vh">
+  <input type="file" id="quickFileAny" class="vh">
+  <div class="card" id="calCard">
+    <div class="row noprint" style="justify-content:flex-end;margin-bottom:6px"><label for="quickFile" class="btn small" id="btnQuickSmall" role="button">📅 Hent ny vagtplan fra KMD</label></div>
+    <div class="monthbar">
+      <button class="mprev" aria-label="Forrige måned">‹</button>
+      <h2 class="mtitle"></h2>
+      <button class="mnext" aria-label="Næste måned">›</button>
+    </div>
+    <div class="row noprint" style="justify-content:center;margin-bottom:8px"><button class="small mtoday">I dag</button></div>
+    <div id="holdCal"></div>
+    <div id="cal" class="cal"></div>
+    <div class="legend" id="legend"></div>
+    <div id="emptyHint" class="note hide" style="margin-top:10px">Ingen vagter endnu. Gå til <b>Import</b> og indlæs din vagtplan (.ics eller .csv) eksporteret fra KMD Opus.</div>
+  </div>
+</section>
+<section class="section hide" id="sec-liste">
+  <div class="card">
+    <div class="monthbar">
+      <button class="mprev">‹</button>
+      <h2 class="mtitle"></h2>
+      <button class="mnext">›</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="listOnly"> Vis kun dage med vagter eller afvigelser</label>
+    <div id="holdList"></div>
+    <div id="list" class="list"></div>
+  </div>
+</section>
+<section class="section hide" id="sec-oversigt">
+  <div class="card">
+    <div class="monthbar">
+      <button class="mprev noprint">‹</button>
+      <h2 class="mtitle"></h2>
+      <button class="mnext noprint">›</button>
+    </div>
+    <div id="printHead" class="small muted"></div>
+    <div class="warnbox"><b>Vejledende beregning.</b> Tallene er kun en hjælp. Satser og tidsrum er taget fra arbejdstidsaftalen for døgnområdet (79.01, OK24 med OK26-ændringer – se aftaler/regler.md). Lønsedlen og evt. lokalaftaler er det, der gælder.</div>
+    <div id="holdSum" style="margin-top:10px"></div>
+    <div class="kpis" id="kpis" style="margin-top:10px"></div>
+    <h3>Advarsler og info</h3>
+    <div id="checks"></div>
+    <h3>Tillæg for arbejde på særlige tidspunkter</h3>
+    <div style="overflow-x:auto"><table id="tillaeg"></table></div>
+    <p class="small muted" id="tillaegNote"></p>
+    <h3>Normtid og overarbejde</h3>
+    <div id="overbox"></div>
+    <h3>Uger</h3>
+    <div style="overflow-x:auto"><table id="weeks"></table></div>
+    <h3>Weekender – rytme hver 2,5. weekend <span class="pill-lok">kun info</span></h3>
+    <div id="wknd"></div>
+    <h3>Afvigelser i måneden</h3>
+    <div style="overflow-x:auto"><table id="devtable"></table></div>
+    <h3>Dag for dag</h3>
+    <div style="overflow-x:auto"><table id="daytable"></table></div>
+    <p class="small muted" id="defs"></p>
+    <div class="row noprint" style="margin-top:10px">
+      <button class="pri" id="btnCsvMonth">Hent månedsoversigt (CSV)</button>
+      <button id="btnPrint">Udskriv / gem som PDF</button>
+    </div>
+  </div>
+</section>
+<section class="section hide" id="sec-import">
+  <div class="card">
+    <h2>Importér vagtplan</h2>
+    <p class="small muted">Eksportér din vagtplan fra KMD Opus (eller din Google-kalender) som <b>.ics</b> eller <b>.csv</b> og vælg filen her. Filen bliver kun læst på din egen telefon/computer – intet sendes nogen steder hen. Ved ny import flettes vagterne ind; dine afvigelser bliver aldrig slettet.</p>
+    <input type="file" id="impFile" accept=".ics,.csv,.txt,text/calendar,text/csv">
+    <div id="impOpts" class="hide" style="margin-top:12px">
+      <div id="tzOpts">
+        <label class="chk"><input type="checkbox" id="optFix" checked> <b>Ret dobbelt tidszone-forskydning</b></label>
+        <p class="small muted" style="margin:2px 0 6px 28px">Brug denne, hvis vagterne står 1–2 timer for tidligt (fx 13:00 i stedet for 15:00). Lægger den danske UTC-forskel til én gang mere på vagter med klokkeslæt. Heldagsbegivenheder (fridøgn mm.) ændres ikke.</p>
+        <div style="margin-left:28px" id="fixScopeBox">
+          <label class="chk"><input type="radio" name="fixScope" value="created" checked> Kun begivenheder oprettet fra og med <input type="date" id="optFixFrom" style="padding:3px 6px"></label>
+          <label class="chk"><input type="radio" name="fixScope" value="all"> Alle vagter med klokkeslæt i filen</label>
+          <p class="small muted" id="fixScopeHint" style="margin:2px 0"></p>
+        </div>
+      </div>
+      <label class="chk"><input type="checkbox" id="optReplace" checked> Fjern gamle planlagte vagter i filens periode, som ikke længere findes i filen</label>
+      <div id="impPreview" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="pri" id="btnDoImport">Importér</button>
+        <button id="btnCancelImport">Annullér</button>
+      </div>
+    </div>
+    <div id="impResult"></div>
+  </div>
+  <div class="card">
+    <h2>CSV-format</h2>
+    <p class="small muted">Appen gætter selv kolonnerne. Den leder efter <b>dato</b>, <b>start</b>, <b>slut</b> og <b>type</b> (fx "Normal Tjeneste"). Separator kan være semikolon, komma eller tab. Datoer som 25-10-2026, 25.10.2026 eller 2026-10-25, og tider som 15:00 eller 15.00. CSV-tider læses som dansk tid (ingen tidszone-rettelse). Uden tider bliver det en heldagsbegivenhed.</p>
+    <pre class="small" style="background:#f6f8fa;padding:8px;border-radius:8px;overflow:auto">Dato;Start;Slut;Type
+25-10-2026;15:00;23:00;Normal Tjeneste
+27-10-2026;;;Planlagt Fridøgn</pre>
+  </div>
+</section>
+<section class="section hide" id="sec-indstillinger">
+  <div class="card">
+    <h2>Profil</h2>
+    <div class="grid2">
+      <div><label>Navn</label><input id="sName" style="width:100%"></div>
+      <div><label>Arbejdssted / afdeling</label><input id="sPlace" style="width:100%"></div>
+      <div><label>Stilling</label><input id="sJob" style="width:100%"></div>
+      <div><label>Ugentlig normtid (timer) – fuldtid = 37</label><input id="sNorm" type="number" step="0.01" min="0" style="width:100%"></div>
+      <div><label>Årsløn i kr. (valgfri – kun til at vise tillæg i kr.)</label><input id="sAarsloen" inputmode="decimal" placeholder="fx fra lønsedlen" style="width:100%"><span class="small muted">Timeløn = årsløn / 1924 (79.01 § 16, s. 14). Uden årsløn vises ingen kronebeløb.</span></div>
+      <div><label class="chk"><input type="checkbox" id="sNightFixed"> Jeg er fast nattevagt</label><span class="small muted">Faste nattevagter er ikke omfattet af 24. december-reglen (79.01 § 5 stk. 1).</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>11-timers reglen</h2>
+    <label class="chk"><input type="checkbox" id="sWaiver"> Jeg har underskrevet aftale om fravigelse af 11-timers reglen</label>
+    <div class="grid2" style="margin-top:8px">
+      <div><label>Dato for underskrift (aftalen gælder fra)</label><input type="date" id="sWaiverDate" style="width:100%"></div>
+      <div><label>Gælder til (valgfri)</label><input type="date" id="sWaiverTo" style="width:100%"></div>
+    </div>
+    <label style="margin-top:8px">Note (fx hvem aftalen er indgået med, betingelser)</label>
+    <textarea id="sWaiverNote"></textarea>
+    <p class="small muted">Med underskrevet aftale må hviletiden nedsættes til <b>8 timer</b>, <b>højst 2 gange pr. uge</b> og <b>ikke to døgn i træk</b> (79.02 § 2; fra OK26 64.12a § 5). Inden for disse grænser vises kort hviletid som <b>info</b>; brud på grænserne – og under 11 timer uden aftale eller uden for aftalens periode – vises som <b>advarsel</b>.</p>
+  </div>
+  <div class="card" id="hertugCard">
+    <h2>Hertughaven – lokale forhold <span class="pill-lok">oplyst af dig</span></h2>
+    <p class="small muted">Kun til visning og info. Intet her ændrer timer, tillæg eller advarsler.</p>
+    <h3>Faste vagttider</h3>
+    <div class="grid3" id="patRows"></div>
+    <p class="small muted">Vagter i planen, der starter og slutter præcis på disse tider, får mærket Dag / Aften / Nat. Andre tider vises som <b>Anden vagt</b>. Kursus, ferie og afspadsering får intet mærke.</p>
+    <div class="small" id="kindStats"></div>
+    <h3>Min faste weekendvagt</h3>
+    <select id="sWeekendFixed"><option value="lor">Lørdag</option><option value="son">Søndag</option><option value="ingen">Ingen / ikke valgt</option></select>
+    <span class="small muted">Der arbejdes hver 2,5. weekend. Oversigten over dine weekender står under Oversigt (kun info – ikke en regel om betaling).</span>
+    <h3>Mit hold i år (jul / nytår)</h3>
+    <p class="small muted">Holdene skifter hvert år. Vises i december.</p>
+    <div class="grid3" id="holdRows"></div>
+    <h3>Særaftale (nattevagt/sygeplejerske)</h3>
+    <div class="grid2"><div><label>Særaftale for</label><select id="sSaerKind" style="width:100%"><option value="">Ingen</option><option value="nattevagt">Nattevagt</option><option value="sygeplejerske">Sygeplejerske</option><option value="anden">Anden</option></select></div></div>
+    <label style="margin-top:8px">Notat (fritekst)</label>
+    <textarea id="sSaerNote" placeholder="Fx hvad særaftalen siger om vagtfordeling, 7/7 osv."></textarea>
+    <div id="saerDocs" style="margin-top:6px"></div>
+    <p class="small muted">Særaftaler er individuelle. Appen gemmer kun dit notat og din fil lokalt (offline) og bruger dem <b>ikke</b> til at beregne eller vurdere noget – tjek selv beregningerne mod din særaftale.</p>
+    <div class="row" style="margin-top:10px"><button class="pri" id="btnSaveHertug">Gem</button></div>
+  </div>
+  <div class="card">
+    <h2>Aftaler og dokumenter</h2>
+    <p class="small muted">Dokumenterne gemmes kun lokalt i denne browser (IndexedDB). Tag gerne backup under "Eksport &amp; backup".</p>
+    <div id="docCats"></div>
+  </div>
+  <div class="card">
+    <h2>Grænser til de vejledende beregninger</h2>
+    <p class="small muted">Sæt dem efter din overenskomst/arbejdstidsaftale. Standardværdierne er kun udgangspunkter, ikke regler.</p>
+    <div class="grid3">
+      <div><label>Aften fra</label><input type="time" id="sEveFrom"></div>
+      <div><label>Aften til</label><input type="time" id="sEveTo"></div>
+      <div><label>Hviletid, grænse (timer)</label><input type="number" id="sRest" step="0.5" min="0"></div>
+      <div><label>Nat fra</label><input type="time" id="sNightFrom"></div>
+      <div><label>Nat til</label><input type="time" id="sNightTo"></div>
+      <div><label>Max gennemsnit pr. uge over 4 måneder (timer)</label><input type="number" id="sWeekMax" step="0.5" min="0"><span class="small muted">48 t i gennemsnit over 4 måneder (79.01 § 3 stk. 1, bem., s. 4) – ikke pr. uge.</span></div>
+      <div><label>Lørdag</label><select id="sSatMode" style="width:100%"><option value="aftale">Efter aftalen: 08–24 før 1.1.2026, 06–24 fra 1.1.2026</option><option value="egen">Eget tidsrum</option></select></div>
+      <div><label>Lørdag fra (eget)</label><input type="time" id="sSatFrom"></div>
+      <div><label>Lørdag til (eget, 00:00 = midnat)</label><input type="time" id="sSatTo"></div>
+      <div><label>Min. timer i vinduet for at tælle som aften-/nattevagt</label><input type="number" id="sMinWin" step="0.5" min="0"><span class="small muted">Bruges kun til at tælle antal vagter – påvirker ikke timer eller tillæg.</span></div>
+    </div>
+    <h3>Lokalaftaler</h3>
+    <label class="chk"><input type="checkbox" id="sLokWeekend"> <span class="pill-lok">Lokalaftale</span> Weekendtillæg som afspadsering (lørdag 32 %, søn-/helligdag 50 % omregnes til afspadseringstimer i stedet for penge)</label>
+    <p class="small muted" style="margin-left:28px">Oplyst af dig for Hertughaven – appen har ikke set aftalen skriftligt. Aften- og nattillæg udbetales som før.</p>
+    <h3>Særlige fridage (79.01 § 5)</h3>
+    <p class="small muted">De officielle helligdage beregnes automatisk (nytårsdag, påske, Kr. himmelfart, pinse, jul); søn- og helligdage giver 50 % hele døgnet. Store bededag er ikke med fra 2024. Reglerne nedenfor gælder "hele landet" undtagen FKKA, København og Frederiksberg – dvs. også Sønderborg.</p>
+    <label class="chk"><input type="checkbox" id="xMaj1"> 1. maj – kl. 12–24 honoreres som søndag (§ 5 stk. 2, s. 6–7)</label>
+    <label class="chk"><input type="checkbox" id="xGrund"> Grundlovsdag (5. juni) – kl. 12–24 honoreres som søndag (§ 5 stk. 2)</label>
+    <label class="chk"><input type="checkbox" id="xNyt"> Nytårsaftensdag (31. december) – kl. 12–24 honoreres som søndag (§ 5 stk. 2)</label>
+    <label class="chk"><input type="checkbox" id="xJul"> Juleaftensdag (24. december) – søgnehelligdag fra dagstjenestens begyndelse (§ 5 stk. 1, s. 6); ikke for faste nattevagter</label>
+    <div style="margin-left:28px"><label>Dagstjenesten begynder kl.</label> <input type="time" id="sJulFrom"> <span class="pill-warn" id="julPh">PLADSHOLDER – afklar lokalt</span><span class="pill-lok" id="julOkPill">Bekræftet lokalt (Hertughaven: dag 07:30)</span> <label class="chk" style="display:inline-flex"><input type="checkbox" id="sJulOk"> tidspunktet er bekræftet lokalt</label></div>
+    <div class="row" style="margin-top:10px"><button class="pri" id="btnSaveSettings">Gem indstillinger</button></div>
+  </div>
+  <div class="card">
+    <h2>Afvigelsestyper og timeeffekt</h2>
+    <p class="small muted">Standard for om en afvigelse lægges til (+), trækkes fra (−) eller ikke påvirker (0) nettotimerne. Kan ændres på den enkelte afvigelse.</p>
+    <div id="devTypeSigns"></div>
+  </div>
+</section>
+<section class="section hide" id="sec-backup">
+  <div class="card">
+    <h2>Kalender til Google/Outlook (.ics)</h2>
+    <p class="small muted">Laver en .ics-fil med de <b>rettede</b> tider (tidszone Europe/Copenhagen). Importér den i en ny/tom kalender i Google Kalender, så du ikke får dubletter.</p>
+    <div class="grid2">
+      <div><label>Fra dato</label><input type="date" id="icsFrom" style="width:100%"></div>
+      <div><label>Til dato</label><input type="date" id="icsTo" style="width:100%"></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="icsAllDay" checked> Medtag heldagsbegivenheder (fridøgn, arbejdsfri dag …)</label>
+    <label class="chk"><input type="checkbox" id="icsDevs"> Medtag mine afvigelser med klokkeslæt</label>
+    <div class="row" style="margin-top:8px"><button class="pri" id="btnIcs">Hent .ics</button></div>
+  </div>
+  <div class="card">
+    <h2>Backup</h2>
+    <p class="small muted">Alt ligger kun i denne browser. Gem en backup jævnligt (fx i OneDrive), og brug den til at flytte data til en ny telefon.</p>
+    <label class="chk"><input type="checkbox" id="bkDocs" checked> Medtag vedhæftede dokumenter (gør filen større)</label>
+    <div class="row" style="margin-top:8px">
+      <button class="pri" id="btnBackup">Hent backup (.json)</button>
+      <label class="btn" style="color:var(--ink);font-size:15px">Gendan fra backup… <input type="file" id="bkFile" accept=".json,application/json" class="hide"></label>
+    </div>
+    <div id="bkResult"></div>
+  </div>
+  <div class="card">
+    <h2>Slet data</h2>
+    <div class="row">
+      <button class="danger" id="btnClearShifts">Slet alle importerede vagter</button>
+      <button class="danger" id="btnClearAll">Slet ALT (vagter, afvigelser, dokumenter, indstillinger)</button>
+    </div>
+  </div>
+  <p class="small muted" style="text-align:center">Vagtplan v1 · virker offline · data forlader ikke din enhed</p>
+</section>
+</main>
+<div class="modal" id="dayModal" role="dialog" aria-modal="true"><div class="box" id="dayBox"></div></div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="askModal" role="dialog" aria-modal="true"><div class="box" style="max-width:420px;margin-top:20vh"><p id="askMsg" style="margin-top:0"></p><div class="row" style="justify-content:flex-end;gap:8px"><button id="askNo">Annullér</button><button id="askYes" class="pri">OK</button></div></div></div>
+<script>
+'use strict';
+/* ===== Basics ===== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const H=3600000, D=86400000, MIN=60000;
+const DAYS=['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'];
+const DAYS_S=['søn','man','tir','ons','tor','fre','lør'];
+const MONTHS=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+const fmtH=h=>(Math.round(h*100)/100).toLocaleString('da-DK',{minimumFractionDigits:0,maximumFractionDigits:2});
+const fmtH2=h=>(Math.round(h*100)/100).toFixed(2).replace('.',',');
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2500);}
+/* "Lokal" tid = dansk vægur (Europe/Copenhagen), gemt som ms via Date.UTC-felter */
+const L=(y,m,d,h=0,mi=0)=>Date.UTC(y,m-1,d,h,mi);
+const lIso=ms=>new Date(ms).toISOString().slice(0,16);
+const lDate=ms=>new Date(ms).toISOString().slice(0,10);
+const lTime=ms=>new Date(ms).toISOString().slice(11,16);
+const parseLD=s=>{const [y,m,d]=s.split('-').map(Number);return L(y,m,d);};
+const parseLIso=s=>{const [a,b]=s.split('T');const [y,m,d]=a.split('-').map(Number);const [h,mi]=(b||'00:00').split(':').map(Number);return L(y,m,d,h,mi);};
+const wd=ms=>new Date(ms).getUTCDay();
+const addDays=(ds,n)=>lDate(parseLD(ds)+n*D);
+const hm2min=s=>{if(!s)return null;const m=/^(\d{1,2}):(\d{2})/.exec(s);return m?(+m[1])*60+(+m[2]):null;};
+function lastSunday(y,m){const d=new Date(Date.UTC(y,m,0));return Date.UTC(y,m-1,d.getUTCDate()-d.getUTCDay());}
+/* EU-sommertid: sidste søndag i marts 01:00 UTC til sidste søndag i oktober 01:00 UTC */
+function cphOffset(utc){const y=new Date(utc).getUTCFullYear();const s=lastSunday(y,3)+H,e=lastSunday(y,10)+H;return (utc>=s&&utc<e)?2*H:H;}
+const utcToL=u=>u+cphOffset(u);
+function lToUtc(l){if(cphOffset(l-2*H)===2*H)return l-2*H;return l-H;}
+function isoWeek(ms){const d=new Date(ms);const day=(d.getUTCDay()+6)%7;const th=new Date(ms-day*D+3*D);const y=th.getUTCFullYear();const jan4=Date.UTC(y,0,4);const w1=jan4-((new Date(jan4).getUTCDay()+6)%7)*D;return {y,w:1+Math.floor((ms-day*D-w1)/(7*D))};}
+const todayL=()=>lDate(utcToL(Date.now()));
+
+/* ===== Helligdage ===== */
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return L(y,mo,da);}
+const _holCache={};
+function holidays(y){
+  const key=y;if(_holCache[key])return _holCache[key];
+  const e=easter(y),r={};const add=(ms,n)=>r[lDate(ms)]=n;
+  add(L(y,1,1),'Nytårsdag');add(e-3*D,'Skærtorsdag');add(e-2*D,'Langfredag');add(e,'Påskedag');add(e+D,'2. påskedag');
+  if(y<2024)add(e+26*D,'Store bededag');
+  add(e+39*D,'Kr. himmelfartsdag');add(e+49*D,'Pinsedag');add(e+50*D,'2. pinsedag');add(L(y,12,25),'Juledag');add(L(y,12,26),'2. juledag');
+  return _holCache[key]=r; /* kun officielle helligdage – særlige fridage (79.01 § 5) se specialDays() */
+}
+const officialHoliday=ds=>holidays(+ds.slice(0,4))[ds]||null;
+const holidayName=ds=>{const o=officialHoliday(ds);if(o)return o;const s=specialDays(+ds.slice(0,4))[ds];return s?s.label:null;};
+
+/* ===== State ===== */
+const KEY='vagtapp.v1';
+const DEV_TYPES=['Overarbejde','Afspadsering','Kursus','Sygdom','Ferie','Omlagt vagt','Ekstravagt','Andet'];
+const DEV_COLORS={'Overarbejde':'#f79009','Afspadsering':'#ca8504','Kursus':'#7a5af8','Sygdom':'#d92d20','Ferie':'#0e9384','Omlagt vagt':'#2e90fa','Ekstravagt':'#dc6803','Andet':'#667085'};
+const SETTINGS_VER=4;
+const DEFAULT_SETTINGS={ver:SETTINGS_VER,name:'',place:'',job:'',norm:37,aarsloen:'',waiver:{on:false,date:'',to:'',note:''},
+  eveFrom:'17:00',eveTo:'23:00',nightFrom:'23:00',nightTo:'06:00',satMode:'aftale',satFrom:'06:00',satTo:'00:00',rest:11,weekMax:48,minWin:2,
+  extra:{maj1:true,grund:true,jul:true,nyt:true},julFrom:'07:30',julOk:true, /* Hertughaven: dagtjenesten begynder 07:30 (oplyst lokalt) */ nightFixed:false,
+  shiftPatterns:[{k:'dag',label:'Dag',from:'07:30',to:'15:30'},{k:'aften',label:'Aften',from:'15:00',to:'23:00'},{k:'nat',label:'Nat',from:'22:45',to:'07:45'}],
+  weekendFixed:'ingen',hold:{},saer:{kind:'',note:''},
+  lokalWeekendAfsp:true, /* LOKALAFTALE Hertughaven (oplyst lokalt, ikke set skriftligt): lørdags- og søn-/helligdagstillæg som afspadsering */
+  devSigns:{'Overarbejde':1,'Afspadsering':-1,'Kursus':0,'Sygdom':-1,'Ferie':-1,'Omlagt vagt':0,'Ekstravagt':1,'Andet':0},
+  fixTZ:true,fixScope:'created',fixFrom:''};
+const freshSettings=()=>JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+let S={shifts:{},devs:{},settings:freshSettings(),meta:{}};
+function deepMerge(a,b){for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object')deepMerge(a[k],b[k]);else a[k]=b[k];}return a;}
+/* Lagring: localStorage (hurtig) + spejl i IndexedDB (robust). Åbnes filen som content:// eller i en mail-forhåndsvisning kan localStorage mangle/være midlertidig. */
+let STORE={ls:false,idb:false,persist:null,err:''};
+function lsOk(){try{const k='__vt_probe';localStorage.setItem(k,'1');const ok=localStorage.getItem(k)==='1';localStorage.removeItem(k);return ok;}catch(e){STORE.err=e.name||String(e);return false;}}
+function applyState(r){S.shifts=r.shifts||{};S.devs=r.devs||{};S.meta=r.meta||{};S.settings=deepMerge(freshSettings(),r.settings||{});migrate(r.settings||{});invalidate();}
+function load(){STORE.ls=lsOk();try{const r=STORE.ls?JSON.parse(localStorage.getItem(KEY)||'null'):null;if(r)applyState(r);}catch(e){console.error(e);}}
+function stDb(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('ingen IndexedDB'));let q;try{q=indexedDB.open('vagtapp-state',1);}catch(e){return rej(e);}q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
+async function idbStateGet(){const db=await stDb();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(KEY);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error);});}
+async function idbStateSet(json){const db=await stDb();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(json,KEY);t.oncomplete=()=>res(true);t.onerror=()=>rej(t.error);});}
+async function idbStateDel(){try{const db=await stDb();await new Promise(res=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').delete(KEY);t.oncomplete=t.onerror=()=>res();});}catch(e){}}
+/* Hent fra IndexedDB hvis den er nyere end localStorage (eller localStorage er tom/utilgængelig). Returnerer true hvis data blev skiftet. */
+async function loadIdb(){try{const j=await idbStateGet();STORE.idb=true;if(!j)return false;const r=JSON.parse(j);const a=(r.meta&&r.meta.savedAt)||'',b=(S.meta&&S.meta.savedAt)||'';const have=Object.keys(S.shifts).length;if(!have&&Object.keys(r.shifts||{}).length||a>b){applyState(r);if(STORE.ls)try{localStorage.setItem(KEY,j);}catch(e){}return true;}}catch(e){STORE.idb=false;console.warn('IndexedDB',e);}return false;}
+async function askPersist(){try{if(navigator.storage&&navigator.storage.persist){STORE.persist=await navigator.storage.persisted()||await navigator.storage.persist();}}catch(e){}return STORE.persist;}
+/* Opgradering af gemte data fra version 1 (pladsholdere) til version 2 (regler fra aftaler/regler.md) */
+function migrate(old){
+  const st=S.settings;const v=old.ver||1;
+  if(v<2){
+    st.satMode='aftale';st.satFrom='06:00';st.satTo='00:00';
+    st.extra={maj1:true,grund:true,jul:true,nyt:true};
+    if(st.norm===''||st.norm==null)st.norm=37;
+    const ds=st.devSigns||{};if('Overtid/merarbejde' in ds){ds['Overarbejde']=ds['Overtid/merarbejde'];delete ds['Overtid/merarbejde'];}
+  }
+  if(v<3){if(old.lokalWeekendAfsp===undefined)st.lokalWeekendAfsp=true;}
+  if(v<4){if(!old.julOk&&(!old.julFrom||old.julFrom==='07:00')){st.julFrom='07:30';st.julOk=true;}}
+  st.ver=SETTINGS_VER;
+  for(const v of Object.values(S.devs))if(v.type==='Overtid/merarbejde')v.type='Overarbejde';
+}
+function save(){S.meta=S.meta||{};S.meta.savedAt=new Date().toISOString();const j=JSON.stringify(S);let ok=false;try{localStorage.setItem(KEY,j);ok=true;}catch(e){STORE.err=e.name||String(e);}idbStateSet(j).then(()=>{STORE.idb=true;},e=>{STORE.idb=false;if(!ok)toast('Kunne ikke gemme på denne enhed – se banneret øverst');if(typeof renderStorageBanner==='function')renderStorageBanner();});invalidate();}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+
+/* ===== Vagttyper ===== */
+const TYPES=[
+  {k:'normal',re:/normal\s*tjeneste|^vagt|tjeneste/i,label:'Vagt',color:'#2e90fa',cat:'work'},
+  {k:'overarbejde',re:/overarbejde|overtid|merarbejde/i,label:'Overarbejde',color:'#f79009',cat:'work'},
+  {k:'kursus',re:/kursus|uddannelse/i,label:'Kursus',color:'#7a5af8',cat:'work'},
+  {k:'afspad',re:/afspad/i,label:'Afspadsering',color:'#eaaa08',cat:'absence'},
+  {k:'ferie',re:/ferie/i,label:'Ferie',color:'#0e9384',cat:'absence'},
+  {k:'syg',re:/syg/i,label:'Sygdom',color:'#d92d20',cat:'absence'},
+  {k:'fridogn',re:/fridøgn|fridogn|fri døgn/i,label:'Fridøgn',color:'#12b76a',cat:'free'},
+  {k:'arbfri',re:/arbejdsfri|fridag|^fri$/i,label:'Arbejdsfri',color:'#75e0a7',cat:'free'},
+  {k:'andet',re:/.*/,label:'Andet',color:'#98a2b3',cat:'other'}];
+const typeOf=summary=>TYPES.find(t=>t.re.test(summary||''))||TYPES[TYPES.length-1];
+const typeInfo=k=>TYPES.find(t=>t.k===k)||TYPES[TYPES.length-1];
+
+/* ===== ICS ===== */
+function unescIcs(v){return v.replace(/\\n/gi,'\n').replace(/\\([,;\\])/g,'$1');}
+function parseIcs(text){
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\n[ \t]/g,'').split('\n');
+  const evs=[];let cur=null;const cal={};
+  for(const ln of lines){
+    if(ln.trim()==='BEGIN:VEVENT'){cur={};continue;}
+    if(ln.trim()==='END:VEVENT'){if(cur)evs.push(cur);cur=null;continue;}
+    const m=/^([A-Za-z0-9-]+)((?:;[^:]*)?):(.*)$/.exec(ln);if(!m)continue;
+    const name=m[1].toUpperCase(),params={};
+    m[2].split(';').filter(Boolean).forEach(p=>{const i=p.indexOf('=');params[p.slice(0,i).toUpperCase()]=p.slice(i+1).replace(/"/g,'');});
+    if(cur){if(!cur[name])cur[name]={v:m[3],p:params};}else cal[name]=m[3];
+  }
+  return {cal,evs};
+}
+function icsTime(prop){
+  const v=prop.v.trim();
+  if(prop.p.VALUE==='DATE'||/^\d{8}$/.test(v))return {date:v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8)};
+  const m=/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})?(Z?)$/.exec(v);if(!m)return null;
+  const naive=Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0));
+  if(m[7]==='Z')return {utc:naive};
+  return {local:naive}; /* TZID eller flydende tid: læses som dansk tid */
+}
+function icsToRecords(parsed,opt){
+  const out=[];let corrected=0;
+  for(const ev of parsed.evs){
+    if(!ev.DTSTART)continue;
+    if(ev.STATUS&&/CANCELLED/i.test(ev.STATUS.v))continue;
+    const summary=unescIcs((ev.SUMMARY&&ev.SUMMARY.v)||'(uden titel)').trim();
+    const desc=ev.DESCRIPTION?unescIcs(ev.DESCRIPTION.v):'';
+    const uidv=ev.UID?ev.UID.v:('noid-'+ev.DTSTART.v+'-'+summary);
+    const created=ev.CREATED?ev.CREATED.v.slice(0,4)+'-'+ev.CREATED.v.slice(4,6)+'-'+ev.CREATED.v.slice(6,8):'';
+    const s=icsTime(ev.DTSTART);const e=ev.DTEND?icsTime(ev.DTEND):null;if(!s)continue;
+    const base={uid:uidv,summary,source:'ics',created,rawStart:ev.DTSTART.v,rawEnd:ev.DTEND?ev.DTEND.v:''};
+    let sd,ed;
+    if(s.date){sd=s.date;ed=e&&e.date?e.date:addDays(sd,1);}
+    else{
+      const sU=s.utc!=null?s.utc:lToUtc(s.local);
+      let eU=sU;if(e){if(e.utc!=null)eU=e.utc;else if(e.local!=null)eU=lToUtc(e.local);else if(e.date)eU=lToUtc(parseLD(e.date));}
+      const sL=utcToL(sU),eL=utcToL(eU);
+      const span=eL-sL;
+      const looksAllDay=/^all day$/i.test(desc.trim())||(lTime(sL)==='00:00'&&lTime(eL)==='00:00'&&span>=D-H);
+      if(looksAllDay){sd=lDate(sL+2*H);ed=lDate(eL+2*H);if(ed<=sd)ed=addDays(sd,1);}
+      else{
+        const doFix=!!opt.fix&&s.utc!=null&&(opt.scope==='all'||!created||!opt.from||created>=opt.from);
+        let su=sU,eu=eU;
+        if(doFix){su=sU+cphOffset(sU);eu=eU+cphOffset(eU);corrected++;}
+        const sl=utcToL(su),el=utcToL(eu);
+        const rec=Object.assign({},base,{allDay:false,corrected:doFix,uncorrStart:lIso(sL),uncorrEnd:lIso(eL),type:typeOf(summary).k});
+        if(eu-su>D+H){ /* flerdags-begivenhed med klokkeslæt: del op pr. dag */
+          let dS=parseLD(lDate(sl));
+          while(dS<el){const a=Math.max(sl,dS),b=Math.min(el,dS+D);
+            if(b>a)out.push(Object.assign({},rec,{part:true,id:uidv+'#'+lDate(dS),date:lDate(dS),start:lIso(a),end:lIso(b),hours:(b-a)/H}));
+            dS+=D;}
+        } else out.push(Object.assign(rec,{id:uidv,date:lDate(sl),start:lIso(sl),end:lIso(el),hours:(eu-su)/H}));
+        continue;
+      }
+    }
+    let d=sd,guard=0;
+    while(d<ed&&guard++<400){out.push(Object.assign({},base,{id:uidv+'#'+d,date:d,allDay:true,start:'',end:'',hours:0,type:typeOf(summary).k,corrected:false}));d=addDays(d,1);}
+  }
+  return {records:out,corrected};
+}
+
+/* ===== CSV ===== */
+function splitCsv(text,delim){
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true;else if(c===delim){row.push(f);f='';}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f='';}
+    else f+=c;}
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  return rows.filter(r=>r.some(x=>x.trim()!==''));
+}
+function parseDateAny(s){
+  s=(s||'').trim();let m;
+  if((m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s)))return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  if((m=/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{2,4})/.exec(s))){let y=+m[3];if(y<100)y+=2000;const d=+m[1],mo=+m[2];if(mo<1||mo>12||d<1||d>31)return null;return `${y}-${pad(mo)}-${pad(d)}`;}
+  if((m=/^(\d{4})(\d{2})(\d{2})$/.exec(s)))return `${m[1]}-${m[2]}-${m[3]}`;
+  return null;
+}
+function parseTimeAny(s){
+  s=(s||'').trim();if(!s)return null;let m;
+  const t=s.replace(/\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[.\-\/]\d{1,2}[.\-\/]\d{2,4}/,'').trim();
+  if((m=/(?:^|[^\d])(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?(?!\d)/.exec(' '+t))){const h=+m[1],mi=+m[2];if(h<=24&&mi<60)return pad(h===24?0:h)+':'+pad(mi);}
+  if(/^\d{3,4}$/.test(t)){const v=t.padStart(4,'0');const h=+v.slice(0,2),mi=+v.slice(2);if(h<24&&mi<60)return pad(h)+':'+pad(mi);}
+  if((m=/^kl\.?\s*(\d{1,2})$/i.exec(t)))return pad(+m[1])+':00';
+  return null;
+}
+const RANGE_RE=/(\d{1,2}[:.]\d{2})\s*[-–]\s*(\d{1,2}[:.]\d{2})/;
+function csvToRecords(text){
+  text=text.replace(/^\uFEFF/,'');
+  const first=text.split(/\r?\n/).find(l=>l.trim())||'';
+  const delim=[';','\t',','].map(c=>[c,first.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=splitCsv(text,delim);if(!rows.length)return {records:[],error:'Filen er tom.'};
+  const hasHeader=!rows[0].some(c=>parseDateAny(c));
+  const header=hasHeader?rows[0].map(h=>h.trim().toLowerCase()):[];
+  const data=hasHeader?rows.slice(1):rows;const nc=Math.max(...rows.map(r=>r.length));
+  const find=res=>header.findIndex(h=>res.some(r=>r.test(h)));
+  let iDate=find([/^dato/,/date/,/^dag$/]),iStart=find([/start/,/^fra/,/mød/,/begynd/,/^from/]),iEnd=find([/slut/,/^til/,/^end/,/ophør/,/^to$/]),iType=find([/type/,/vagt/,/beskriv/,/summary/,/titel/,/tjeneste/,/^art/,/emne/,/subject/,/aktivitet/]);
+  if([iDate,iStart,iEnd].includes(iType))iType=-1;
+  const score=(i,fn)=>data.filter(r=>fn(r[i]||'')).length;
+  const idx=[...Array(nc).keys()];
+  if(iDate<0){const b=idx.map(i=>[i,score(i,parseDateAny)]).sort((a,b)=>b[1]-a[1])[0];if(b&&b[1]>0)iDate=b[0];}
+  if(iDate<0)return {records:[],error:'Kunne ikke finde en dato-kolonne i CSV-filen.'};
+  let range=-1;
+  if(iStart<0){
+    const rc=idx.filter(i=>i!==iDate&&score(i,c=>RANGE_RE.test(c))>data.length/3);
+    if(rc.length)range=rc[0];
+    else{
+      const tc=idx.filter(i=>i!==iDate&&i!==iType&&score(i,c=>!!parseTimeAny(c)&&!/[a-zæøå]{4,}/i.test(c))>data.length/3);
+      if(tc.length){iStart=tc[0];if(iEnd<0&&tc[1]!=null)iEnd=tc[1];}
+      else if(score(iDate,c=>/\d[:.]\d{2}(?!\d)/.test(c.replace(/\d{1,2}[.\-\/]\d{1,2}[.\-\/]\d{2,4}|\d{4}-\d{1,2}-\d{1,2}/,'')))>0)iStart=iDate;
+    }
+  }
+  if(iType<0){const t=idx.filter(i=>![iDate,iStart,iEnd,range].includes(i)).map(i=>[i,score(i,c=>/[a-zæøå]{3,}/i.test(c))]).sort((a,b)=>b[1]-a[1])[0];if(t&&t[1]>0)iType=t[0];}
+  const records=[];let skipped=0;
+  for(const r of data){
+    const date=parseDateAny(r[iDate]);if(!date){skipped++;continue;}
+    let st=null,en=null;
+    if(range>=0){const m=RANGE_RE.exec(r[range]||'');if(m){st=parseTimeAny(m[1]);en=parseTimeAny(m[2]);}}
+    else{if(iStart>=0){const m=RANGE_RE.exec(r[iStart]||'');if(m){st=parseTimeAny(m[1]);en=parseTimeAny(m[2]);}else st=parseTimeAny(r[iStart]);}
+      if(iEnd>=0&&!en)en=parseTimeAny(r[iEnd]);}
+    let endDate=date;if(iEnd>=0){const ed=parseDateAny(r[iEnd]);if(ed)endDate=ed;}
+    const summary=((iType>=0?r[iType]:'')||'').trim()||(st?'Vagt':'Fri');
+    const id='csv:'+date+':'+(st||'')+':'+summary;
+    const base={uid:id,summary,source:'csv',created:'',type:typeOf(summary).k,corrected:false};
+    if(st){const sl=parseLIso(date+'T'+st);let el=en?parseLIso(endDate+'T'+en):sl;if(el<=sl)el+=D;
+      records.push(Object.assign(base,{id,date,allDay:false,start:lIso(sl),end:lIso(el),hours:(lToUtc(el)-lToUtc(sl))/H}));}
+    else records.push(Object.assign(base,{id,date,allDay:true,start:'',end:'',hours:0}));
+  }
+  return {records,skipped,mapping:{delim,hasHeader,iDate,iStart,iEnd,iType,range,header}};
+}
+/* ===== Import ===== */
+let pending=null;
+function importOpts(){return {fix:$('#optFix').checked,scope:($$('input[name=fixScope]').find(r=>r.checked)||{}).value||'created',from:$('#optFixFrom').value};}
+function handleFile(name,text){
+  pending={name,text,kind:/BEGIN:VCALENDAR/.test(text)?'ics':'csv'};
+  $('#impResult').innerHTML='';
+  if(pending.kind==='ics'){
+    pending.parsed=parseIcs(text);
+    const created=[...new Set(pending.parsed.evs.map(e=>e.CREATED?e.CREATED.v.slice(0,8):'').filter(Boolean))].sort();
+    const last=created.length?created[created.length-1]:'';
+    const lastIso=last?last.slice(0,4)+'-'+last.slice(4,6)+'-'+last.slice(6,8):'';
+    const def=S.settings.fixFrom||lastIso;
+    $('#optFixFrom').value=def;
+    $('#optFix').checked=S.settings.fixTZ!==false;
+    const sc=created.length>1?(S.settings.fixScope||'created'):'all';
+    $$('input[name=fixScope]').forEach(r=>r.checked=r.value===sc);
+    $('#fixScopeHint').textContent=created.length>1?`Filen har begivenheder oprettet på ${created.length} forskellige datoer (seneste ${fmtDate(lastIso)}). Ældre begivenheder kan have rigtige tider – tjek forhåndsvisningen nedenfor.`:'Alle begivenheder i filen behandles ens.';
+    $('#tzOpts').classList.remove('hide');
+  } else $('#tzOpts').classList.add('hide');
+  $('#impOpts').classList.remove('hide');
+  renderPreview();
+}
+function buildPending(){
+  if(!pending)return null;
+  if(pending.kind==='ics'){const o=importOpts();return Object.assign({opts:o},icsToRecords(pending.parsed,o));}
+  return Object.assign({opts:{}},csvToRecords(pending.text));
+}
+const tRange=r=>r.part&&lTime(parseLIso(r.start))==='00:00'&&lTime(parseLIso(r.end))==='00:00'?'hele dagen':lTime(parseLIso(r.start))+'–'+lTime(parseLIso(r.end));
+function renderPreview(){
+  const b=buildPending();const el=$('#impPreview');
+  if(!b||b.error||!b.records.length){el.innerHTML=`<div class="errbox">${esc(b&&b.error?b.error:'Ingen vagter fundet i filen.')}</div>`;$('#btnDoImport').disabled=true;return;}
+  $('#btnDoImport').disabled=false;
+  const recs=b.records.slice().sort((a,c)=>(a.date+(a.start||'')).localeCompare(c.date+(c.start||'')));
+  const dates=recs.map(r=>r.date);const timed=recs.filter(r=>!r.allDay);const today=todayL();
+  let up=timed.filter(r=>r.date>=today);if(!up.length)up=timed.slice(-8);
+  const first=up[0];
+  const types={};recs.forEach(r=>types[r.summary]=(types[r.summary]||0)+1);
+  let h=`<div class="okbox"><b>${esc(pending.name)}</b>: ${recs.length} dage/vagter fra ${fmtDate(dates[0])} til ${fmtDate(dates[dates.length-1])}`+(pending.kind==='ics'?` · ${b.corrected} vagter med klokkeslæt bliver rettet`:'')+(b.skipped?` · ${b.skipped} rækker sprunget over`:'')+`</div>`;
+  if(first)h+=`<div class="infobox" id="firstShift">${first.date>=today?'Første kommende vagt':'Seneste vagt i filen'}: <b>${DAYS[wd(parseLD(first.date))]} ${fmtDate(first.date)} kl. ${tRange(first)}</b> (${esc(first.summary)}). Passer det med din vagtplan? Ellers slå rettelsen til eller fra.</div>`;
+  if(b.mapping){const m=b.mapping,hn=i=>i<0?'–':(m.header[i]||('kolonne '+(i+1)));h+=`<p class="small muted">Kolonner: dato = ${esc(hn(m.iDate))}, start = ${esc(m.range>=0?hn(m.range)+' (interval)':hn(m.iStart))}, slut = ${esc(hn(m.iEnd))}, type = ${esc(hn(m.iType))} · separator "${m.delim==='\t'?'tab':m.delim}".</p>`;}
+  const ic=pending.kind==='ics';
+  h+=`<div style="overflow-x:auto"><table class="prev"><tr><th>Dato</th><th>Type</th><th>Tid i appen</th>${ic?'<th>Uden rettelse</th>':''}</tr>`;
+  for(const r of up.slice(0,8))h+=`<tr><td>${DAYS_S[wd(parseLD(r.date))]} ${fmtDate(r.date)}</td><td>${esc(r.summary)}</td><td><b>${tRange(r)}</b>${r.corrected?' <span class="small" style="color:var(--ok)">rettet</span>':''}</td>${ic?`<td class="muted">${r.uncorrStart?r.uncorrStart.slice(11)+'–'+r.uncorrEnd.slice(11):''}</td>`:''}</tr>`;
+  for(const r of recs.filter(r=>r.allDay&&r.date>=today).slice(0,3))h+=`<tr><td>${DAYS_S[wd(parseLD(r.date))]} ${fmtDate(r.date)}</td><td>${esc(r.summary)}</td><td>hele dagen</td>${ic?'<td></td>':''}</tr>`;
+  h+=`</table></div><p class="small muted">Typer: ${Object.entries(types).map(([k,v])=>esc(k)+' ('+v+')').join(', ')}</p>`;
+  el.innerHTML=h;
+}
+function doImport(){
+  const b=buildPending();if(!b||!b.records.length)return;
+  const ids=new Set(b.records.map(r=>r.id));let added=0,updated=0,removed=0;
+  if($('#optReplace').checked){
+    const ds=b.records.map(r=>r.date).sort();const lo=ds[0],hi=ds[ds.length-1],src=b.records[0].source;
+    for(const [id,s] of Object.entries(S.shifts))if(s.source===src&&s.date>=lo&&s.date<=hi&&!ids.has(id)){delete S.shifts[id];removed++;}
+  }
+  const now=new Date().toISOString();
+  for(const r of b.records){if(S.shifts[r.id])updated++;else added++;S.shifts[r.id]=Object.assign(r,{importedAt:now});}
+  if(pending.kind==='ics'){S.settings.fixTZ=b.opts.fix;S.settings.fixScope=b.opts.scope;S.settings.fixFrom=b.opts.from;}
+  S.meta.lastImport={at:now,file:pending.name,added,updated,removed};
+  save();
+  $('#impResult').innerHTML=`<div class="okbox">Importeret: ${added} nye, ${updated} opdateret, ${removed} fjernet. Dine afvigelser er bevaret.</div>`;
+  $('#impOpts').classList.add('hide');pending=null;$('#impFile').value='';
+  renderAll();toast('Vagtplan importeret');
+}
+
+/* ===== Beregning ===== */
+let _cache=null;function invalidate(){_cache=null;}
+function devHours(d){if(d.from&&d.to){let a=hm2min(d.from),b=hm2min(d.to);if(b<=a)b+=1440;return (b-a)/60;}return +d.hours||0;}
+function devInterval(d){if(!(d.from&&d.to))return null;const a=parseLIso(d.date+'T'+d.from);let b=parseLIso(d.date+'T'+d.to);if(b<=a)b+=D;return [a,b];}
+const devSign=v=>v.sign!=null?+v.sign:(S.settings.devSigns[v.type]||0);
+function unionIv(iv,joinGap=0){iv=iv.filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);const r=[];for(const x of iv){const l=r[r.length-1];if(l&&x[0]<=l[1]+joinGap)l[1]=Math.max(l[1],x[1]);else r.push([x[0],x[1]]);}return r;}
+function subtractIv(iv,cut){let res=iv;for(const c of cut){const n=[];for(const x of res){if(c[1]<=x[0]||c[0]>=x[1]){n.push(x);continue;}if(c[0]>x[0])n.push([x[0],c[0]]);if(c[1]<x[1])n.push([c[1],x[1]]);}res=n;}return res;}
+const ABS_DEV=['Sygdom','Ferie','Afspadsering'],ADD_DEV=['Overarbejde','Ekstravagt','Kursus'];
+const isWork=s=>!s.allDay&&typeInfo(s.type).cat==='work';
+function compute(){
+  if(_cache)return _cache;
+  const byDate={};const get=d=>byDate[d]||(byDate[d]={date:d,shifts:[],devs:[]});
+  for(const s of Object.values(S.shifts))get(s.date).shifts.push(s);
+  for(const v of Object.values(S.devs))get(v.date).devs.push(v);
+  const allIv=[];
+  for(const day of Object.values(byDate)){
+    day.shifts.sort((a,b)=>(a.allDay?0:1)-(b.allDay?0:1)||(a.start||'').localeCompare(b.start||''));
+    day.devs.sort((a,b)=>(a.from||'').localeCompare(b.from||''));
+    const work=day.shifts.filter(isWork);
+    day.planned=work.reduce((a,s)=>a+s.hours,0);
+    day.absPlanned=day.shifts.filter(s=>!s.allDay&&!s.part&&typeInfo(s.type).cat==='absence').reduce((a,s)=>a+s.hours,0);
+    let iv=work.map(s=>[parseLIso(s.start),parseLIso(s.end)]);
+    const om=day.devs.filter(v=>v.type==='Omlagt vagt'&&devInterval(v));
+    if(om.length)iv=om.map(devInterval);
+    for(const v of day.devs){
+      if(ABS_DEV.includes(v.type)){const di=devInterval(v);if(di)iv=subtractIv(iv,[di]);else if(!v.hours||+v.hours>=day.planned-0.01)iv=[];}
+      if(ADD_DEV.includes(v.type)){const di=devInterval(v);if(di)iv.push(di);}
+    }
+    day.actual=unionIv(iv);
+    day.plus=0;day.minus=0;
+    for(const v of day.devs){const h=devHours(v),sg=devSign(v);if(sg>0)day.plus+=h;else if(sg<0)day.minus+=h;}
+    day.net=day.planned+day.plus-day.minus;
+    allIv.push(...day.actual);
+  }
+  const periods=unionIv(allIv,H); /* pauser under 1 time = samme arbejdsperiode */
+  const rests=[];const lim=(+S.settings.rest||11);
+  for(let i=1;i<periods.length;i++){const hrs=(lToUtc(periods[i][0])-lToUtc(periods[i-1][1]))/H;if(hrs<lim)rests.push({from:periods[i-1][1],to:periods[i][0],hours:hrs,date:lDate(periods[i][0])});}
+  classifyRests(rests);
+  _cache={byDate,periods,rests};return _cache;
+}
+function windowHours(a,b,fromS,toS,dayFilter){
+  const f=hm2min(fromS),t=hm2min(toS);let tot=0;
+  for(let d=parseLD(lDate(a))-D;d<=b;d+=D){if(dayFilter&&!dayFilter(d))continue;const ws=d+f*MIN;let we=d+t*MIN;if(we<=ws)we+=D;const o=Math.min(b,we)-Math.max(a,ws);if(o>0)tot+=o;}
+  return tot/H;
+}
+/* Hviletid (79.02 § 2 / OK26: 64.12a § 5): med underskrevet aftale kan hviletiden nedsættes til 8 timer,
+   højst 2 gange pr. uge og ikke to døgn i træk. Uden aftale: advarsel ved under 11 timer.
+   Fortolkning: "uge" = kalenderuge man–søn; "døgn" = datoen hvor den næste arbejdsperiode begynder. */
+function classifyRests(rests){
+  rests.sort((a,b)=>a.to-b.to);const perWeek={};let prevRed=null;
+  for(const x of rests){
+    const reasons=[];
+    if(!waiverActive(x.date)){reasons.push('under 11 timer uden aftale om fravigelse');x.ok=false;x.reasons=reasons;prevRed=null;continue;}
+    if(x.hours<8-1e-9)reasons.push('under 8 timer – også med aftale');
+    const wk=isoWeek(parseLD(x.date));const key=wk.y+'-'+wk.w;perWeek[key]=(perWeek[key]||0)+1;x.weekCount=perWeek[key];
+    if(perWeek[key]>2)reasons.push(`${perWeek[key]}. nedsættelse i uge ${wk.w} – højst 2 pr. uge`);
+    if(prevRed&&addDays(prevRed,1)===x.date)reasons.push('nedsat hviletid to døgn i træk');
+    prevRed=x.date;x.ok=!reasons.length;x.reasons=reasons;
+  }
+  return rests;
+}
+const restText=x=>x.ok?'inden for aftalen om fravigelse (min. 8 t, højst 2 gange/uge, ikke to døgn i træk)':x.reasons.join('; ');
+function waiverActive(ds){const w=S.settings.waiver;if(!w||!w.on)return false;if(w.date&&ds<w.date)return false;if(w.to&&ds>w.to)return false;return true;}
+function monthStats(y,m){
+  const c=compute();const pre=`${y}-${pad(m)}-`;const st=S.settings;const minW=+st.minWin||0;
+  const days=Object.values(c.byDate).filter(d=>d.date.startsWith(pre)).sort((a,b)=>a.date.localeCompare(b.date));
+  const r={planned:0,plus:0,minus:0,net:0,absPlanned:0,shiftCount:0,eve:0,night:0,sat:0,sun:0,hol:0,spec:0,sh:0,eveCount:0,nightCount:0,days:[],devByType:{},tillaeg:emptyTillaeg()};
+  for(const d of days){
+    const dd={date:d.date,planned:d.planned,plus:d.plus,minus:d.minus,net:d.net,eve:0,night:0,sat:0,sun:0,hol:0,spec:0,sh:0,types:d.shifts.map(s=>s.summary),times:d.shifts.filter(s=>!s.allDay).map(tRange),devs:d.devs};
+    r.planned+=d.planned;r.plus+=d.plus;r.minus+=d.minus;r.net+=d.net;r.absPlanned+=d.absPlanned;
+    r.shiftCount+=d.shifts.filter(isWork).length;
+    for(const [a,b] of d.actual){
+      const ph=periodHours(a,b);
+      for(const k of ['eve','night','sat','sun','hol','spec','sh'])dd[k]+=ph[k];
+      /* minWin bruges KUN til at tælle antal aften-/nattevagter */
+      if(ph.eve>0&&ph.eve>=minW)r.eveCount++;if(ph.night>0&&ph.night>=minW)r.nightCount++;
+    }
+    for(const k of ['eve','night','sat','sun','hol','spec','sh'])r[k]+=dd[k];
+    const dt=dayTillaeg(d);mergeTillaeg(r.tillaeg,dt);dd.afsp=afspOf(dt); /* tillæg beregnes uafhængigt af minWin */
+    for(const v of d.devs)r.devByType[v.type]=(r.devByType[v.type]||0)+devHours(v);
+    r.days.push(dd);
+  }
+  r.rests=c.rests.filter(x=>x.date.startsWith(pre));
+  const first=L(y,m,1),last=L(y,m+1,1)-D;const weeks=[];
+  for(let ws=first-((wd(first)+6)%7)*D;ws<=last;ws+=7*D){let t=0,p=0,af=0;for(let i=0;i<7;i++){const dd=c.byDate[lDate(ws+i*D)];if(dd){t+=dd.net;p+=dd.planned;af+=afspOf(dayTillaeg(dd)).total;}}
+    const nf=normFor(lDate(ws),lDate(ws+6*D));weeks.push({start:lDate(ws),end:lDate(ws+6*D),w:isoWeek(ws).w,planned:p,net:t,norm:nf?nf.norm:null,over:nf?Math.max(0,t-nf.norm):null,afsp:af});}
+  r.weeks=weeks;
+  const nm=normFor(lDate(first),lDate(last));r.norm=nm?nm.norm:null;r.normSh=nm?nm.shCount:0;r.over=nm?Math.max(0,r.net-nm.norm):null;
+  r.overDev=r.devByType['Overarbejde']||0;
+  r.avg4m=avg4m(y,m);
+  const tl=timeloen();r.timeloen=tl;
+  r.weekendAfsp=weekendAfsp();r.afsp=afspOf(r.tillaeg);
+  if(tl)for(const k in r.tillaeg)r.tillaeg[k].kr=(r.weekendAfsp&&WEEKEND_KEYS.includes(k))?null:r.tillaeg[k].pctH*tl;
+  return r;
+}
+/* ===== Regler fra aftalerne (kilde: aftaler/regler.md) =====
+   79.01 = Aftale om arbejdstid for de kommunale døgnområder, social- og sundhedspersonale (O.24 50/2024).
+   Satser er % af timelønnen; timeløn = årsløn/1924 (79.01 § 16). Intet beløb uden indtastet årsløn. */
+const SRC={sats:'79.01 § 13 stk. 2, s. 12',runding:'79.01 § 13 stk. 1, s. 12',saerlig:'79.01 § 5 stk. 2, s. 6–7',jul:'79.01 § 5 stk. 1, s. 6',
+  sat:'79.01 § 13 stk. 2, s. 12',timeloen:'79.01 § 16, s. 14',over:'79.01 § 11 stk. 1 og 5, s. 10',ned:'79.01 § 3 stk. 6, s. 5',max48:'79.01 § 3 stk. 1, bemærkning, s. 4',lorhel:'Fælles vejledning (aug. 2025) s. 75',hvile:'79.02 § 2 / OK26 64.12a § 5'};
+/* Satser pr. periode (fra-dato inkl.). Før 1.4.2024 (OK21) har appen ingen kilde → ingen sats. */
+const RATE_PERIODS=[
+  {from:'2024-04-01',eve:30,night:35,sat:30,sh:50},
+  {from:'2025-01-01',eve:35.12,night:39.26,sat:31.71,sh:50},
+  {from:'2026-01-01',eve:36,night:40,sat:32,sh:50}];
+function ratesFor(ds){let r=null;for(const p of RATE_PERIODS)if(ds>=p.from)r=p;return r;}
+/* Lørdag: 08–24 til og med 31.12.2025, 06–24 fra 1.1.2026 (79.01 § 13 stk. 2) */
+function satWindow(ds){const st=S.settings;if(st.satMode==='egen')return [st.satFrom||'00:00',st.satTo==='00:00'||!st.satTo?'24:00':st.satTo];return [ds<'2026-01-01'?'08:00':'06:00','24:00'];}
+/* Særlige fridage (79.01 § 5, "hele landet" – fx Sønderborg):
+   1. maj, Grundlovsdag, 31. dec: kl. 12–24 honoreres som søndag. 24. dec: søgnehelligdag fra dagstjenestens begyndelse (ikke faste nattevagter). */
+function specialDays(y){
+  const st=S.settings,x=st.extra||{},r={};
+  const add=(m,d,on,label,from,kind)=>{if(!on)return;const ds=`${y}-${pad(m)}-${pad(d)}`;if(holidays(y)[ds])return;r[ds]={label,from,kind};};
+  add(5,1,x.maj1,'1. maj (fra kl. 12)','12:00','saerlig');
+  add(6,5,x.grund,'Grundlovsdag (fra kl. 12)','12:00','saerlig');
+  add(12,31,x.nyt,'Nytårsaftensdag (fra kl. 12)','12:00','saerlig');
+  if(!st.nightFixed)add(12,24,x.jul,'Juleaftensdag (fra kl. '+(st.julFrom||'07:00')+')',st.julFrom||'07:00','jul');
+  return r;
+}
+/* Søgnehelligdage (til nedskrivning af normtid, 79.01 § 3 stk. 6): helligdage, der ikke falder på en søndag, samt 24/12 (§ 5 stk. 1, ikke faste nattevagter). */
+function isSognehelligdag(ds){const d=parseLD(ds);if(wd(d)===0)return false;if(officialHoliday(ds))return true;const s=specialDays(+ds.slice(0,4))[ds];return !!(s&&s.kind==='jul');}
+/* Intervaller (lokal ms) på dag d */
+function dayWins(d){
+  const ds=lDate(d),st=S.settings,w={eve:[],night:[],sat:[],sun:[],hol:[],spec:[]};
+  const win=(f,t)=>{const a=d+hm2min(f)*MIN;let b=d+(t==='24:00'?1440:hm2min(t))*MIN;if(b<=a)b+=D;return [a,b];};
+  w.eve.push(win(st.eveFrom,st.eveTo));w.night.push(win(st.nightFrom,st.nightTo));
+  if(wd(d)===6){const [f,t]=satWindow(ds);w.sat.push(win(f,t));}
+  if(wd(d)===0)w.sun.push([d,d+D]);
+  if(officialHoliday(ds))w.hol.push([d,d+D]);
+  const sp=specialDays(+ds.slice(0,4))[ds];if(sp&&wd(d)!==0)w.spec.push(win(sp.from,'24:00'));
+  return w;
+}
+const ivLen=iv=>iv.reduce((a,x)=>a+Math.max(0,x[1]-x[0]),0)/H;
+const clip=(iv,a,b)=>iv.map(x=>[Math.max(a,x[0]),Math.min(b,x[1])]).filter(x=>x[1]>x[0]);
+/* Timer i hver kategori for en arbejdsperiode [a,b]. sh = søn-/helligdagssats (søndag ∪ helligdag ∪ særlig fridag kl. 12–24/24. dec).
+   Lørdagstimer tælles ikke, hvor søn-/helligdagssats gælder (søgnehelligdag på lørdag → helligdagstillæg, ikke lørdagstillæg). */
+function periodHours(a,b){
+  const acc={eve:[],night:[],sat:[],sun:[],hol:[],spec:[]};
+  for(let d=parseLD(lDate(a))-D;d<b;d+=D){const w=dayWins(d);for(const k in acc)acc[k].push(...clip(w[k],a,b));}
+  const sh=unionIv([...acc.sun,...acc.hol,...acc.spec]);
+  return {eve:ivLen(unionIv(acc.eve)),night:ivLen(unionIv(acc.night)),sat:ivLen(subtractIv(unionIv(acc.sat),sh)),sun:ivLen(unionIv(acc.sun)),hol:ivLen(unionIv(acc.hol)),spec:ivLen(subtractIv(unionIv(acc.spec),unionIv([...acc.sun,...acc.hol]))),sh:ivLen(sh)};
+}
+/* Påbegyndt halve time (79.01 § 13 stk. 1): rundes op pr. arbejdsperiode */
+const roundHalf=h=>h<=1e-9?0:Math.ceil(h*2-1e-9)/2;
+const TILLAEG_KEYS=[['eve','Aften 17–23'],['night','Nat 23–06'],['sat','Lørdag'],['sh','Søn- og helligdag']];
+function emptyTillaeg(){const o={};for(const [k] of TILLAEG_KEYS)o[k]={h:0,hr:0,pctH:0,noRate:0};return o;}
+function addTillaeg(acc,ph,ds){const r=ratesFor(ds);for(const [k] of TILLAEG_KEYS){const h=ph[k];if(!h)continue;const hr=roundHalf(h);acc[k].h+=h;acc[k].hr+=hr;if(r)acc[k].pctH+=hr*r[k]/100;else acc[k].noRate+=hr;}}
+/* Lokalaftale: weekendtillæg (lørdag + søn-/helligdag) omregnes til afspadseringstimer:
+   timer (rundet op til påbegyndt halve time pr. arbejdsperiode, som ved betaling – FORTOLKNING) × sats. Fx 1 t lørdag = 0,32 t. */
+const WEEKEND_KEYS=['sat','sh'];
+const weekendAfsp=()=>!!S.settings.lokalWeekendAfsp;
+function dayTillaeg(day){if(day._t)return day._t;const acc=emptyTillaeg();for(const [a,b] of day.actual)addTillaeg(acc,periodHours(a,b),lDate(a));return day._t=acc;}
+const afspOf=acc=>({sat:acc.sat.pctH,sh:acc.sh.pctH,total:acc.sat.pctH+acc.sh.pctH,noRate:acc.sat.noRate+acc.sh.noRate});
+function mergeTillaeg(into,acc){for(const k in into)for(const f of ['h','hr','pctH','noRate'])into[k][f]+=acc[k][f];}
+const timeloen=()=>{const a=parseFloat(String(S.settings.aarsloen||'').replace(/\./g,'').replace(',','.'));return a>0?a/1924:null;};
+/* Normtid: norm pr. uge (fuldtid 37). Nedskrives med norm/5 (= 7,4 t ved 37 t) pr. søgnehelligdag (79.01 § 3 stk. 6). */
+const normWeek=()=>{const n=parseFloat(String(S.settings.norm||'').replace(',','.'));return n>0?n:0;};
+function normFor(fromDs,toDs){const n=normWeek();if(!n)return null;let days=0,sh=0;for(let d=parseLD(fromDs);d<=parseLD(toDs);d+=D){days++;if(isSognehelligdag(lDate(d)))sh++;}return {norm:n*days/7-sh*n/5,shCount:sh};}
+/* 48 timer som gennemsnit over 4 måneder (79.01 § 3 stk. 1 bem.): de 4 kalendermåneder til og med måneden. Kun dage med data i appen. */
+function avg4m(y,m){
+  const c=compute();const startM=L(y,m-3,1),end=L(y,m+1,1)-D;const dates=Object.keys(c.byDate).filter(d=>c.byDate[d].shifts.length).sort();
+  if(!dates.length)return null;let start=Math.max(startM,parseLD(dates[0]));if(start>end)return null;
+  let tot=0;for(let d=start;d<=end;d+=D){const dd=c.byDate[lDate(d)];if(dd)tot+=dd.net;}
+  const weeks=(end-start+D)/(7*D);return {from:lDate(start),to:lDate(end),hours:tot,weeks,avg:tot/weeks,partial:start>startM};
+}
+/* ===== Hertughaven – lokale forhold (oplyst lokalt; ikke set skriftligt) =====
+   Kun visning/info. Intet her påvirker timer, tillæg eller advarsler. */
+const DEFAULT_PATTERNS=[{k:'dag',label:'Dag',from:'07:30',to:'15:30'},{k:'aften',label:'Aften',from:'15:00',to:'23:00'},{k:'nat',label:'Nat',from:'22:45',to:'07:45'}];
+const KIND_SHORT={dag:'D',aften:'A',nat:'N',anden:'?'};
+const KIND_TYPES=['normal','overarbejde']; /* kursus, ferie, afspadsering m.m. klassificeres ikke */
+const patterns=()=>(S.settings.shiftPatterns&&S.settings.shiftPatterns.length?S.settings.shiftPatterns:DEFAULT_PATTERNS);
+function shiftKind(s){
+  if(!s||s.allDay||s.part||!KIND_TYPES.includes(s.type))return null;
+  const a=lTime(parseLIso(s.start)),b=lTime(parseLIso(s.end));
+  const p=patterns().find(p=>p.from===a&&p.to===b);
+  return p?{k:p.k,label:p.label}:{k:'anden',label:'Anden vagt'};
+}
+const kindBadge=(kd,short)=>kd?`<span class="vt vt-${kd.k}" title="${esc(kd.label)}">${short?KIND_SHORT[kd.k]||'?':esc(kd.label)}</span>`:'';
+function kindStats(){const r={dag:0,aften:0,nat:0,anden:0,total:0,andenTimes:{}};
+  for(const s of Object.values(S.shifts)){const kd=shiftKind(s);if(!kd)continue;r.total++;r[kd.k]=(r[kd.k]||0)+1;if(kd.k==='anden'){const t=tRange(s);r.andenTimes[t]=(r.andenTimes[t]||0)+1;}}
+  return r;}
+
+/* Weekender: hvilke lørdage/søndage har vagt i planen, og passer afstanden med "hver 2,5. weekend"
+   (fortolkning: 2 arbejdsweekender pr. 5 uger, dvs. skiftevis 2 og 3 ugers afstand). Kun info. */
+const WKND_LBL={lor:'Lørdag',son:'Søndag',ingen:'Ingen / ikke valgt'};
+function weekendOverview(){
+  const all=Object.values(S.shifts);if(!all.length)return null;
+  const ds=all.map(s=>s.date).sort();const f=parseLD(ds[0]),l=parseLD(ds[ds.length-1]);
+  const on=d=>all.filter(s=>s.date===d);const have=new Set(ds);
+  /* weekenden er dækket af planen, hvis der er mindst én post (vagt, fridøgn, ferie …) i ugen man–søn */
+  const covered=sat=>{for(let i=-5;i<=1;i++)if(have.has(lDate(sat+i*D)))return true;return false;};
+  const fixed=S.settings.weekendFixed||'ingen';
+  const list=[];let prev=null;
+  for(let sat=f-((wd(f)+1)%7)*D;sat<=l;sat+=7*D){
+    const a=lDate(sat),b=lDate(sat+D);
+    const wa=on(a).some(isWork),wb=on(b).some(isWork);
+    const abs=[...on(a),...on(b)].some(s=>typeInfo(s.type).cat==='absence');
+    const w={sat:a,sun:b,week:isoWeek(sat).w,lor:wa,son:wb,worked:wa||wb,absence:abs,covered:covered(sat),gap:null,status:'',notes:[]};
+    if(!w.covered){list.push(w);continue;}
+    if(w.worked){
+      const hole=prev&&list.some(x=>x.sat>prev.sat&&!x.covered);
+      if(hole){w.status='hul';w.notes.push('hul i planen før denne weekend – afstand ikke vurderet');}
+      else if(prev){w.gap=Math.round((sat-parseLD(prev.sat))/(7*D));
+        const absBetween=list.some(x=>x.sat>prev.sat&&x.absence);
+        w.status=(w.gap===2||w.gap===3)?'passer':'afviger';
+        if(w.status==='afviger'&&absBetween)w.notes.push('ferie/fravær i en mellemliggende weekend');}
+      else w.status='første';
+      if(wa&&wb)w.notes.push('både lørdag og søndag');
+      if(fixed==='lor'&&wb&&!wa)w.notes.push('søndag – ikke din faste lørdag');
+      if(fixed==='son'&&wa&&!wb)w.notes.push('lørdag – ikke din faste søndag');
+      if(fixed!=='ingen'&&wa&&wb)w.notes.push('mere end din faste weekendvagt');
+      prev=w;}
+    list.push(w);}
+  const cov=list.filter(w=>w.covered),worked=cov.filter(w=>w.worked),withGap=worked.filter(w=>w.gap!=null);
+  return {list,total:cov.length,uncovered:list.length-cov.length,worked:worked.length,every:worked.length?cov.length/worked.length:null,
+    passer:withGap.filter(w=>w.status==='passer').length,afviger:withGap.filter(w=>w.status==='afviger').length,
+    onlySat:worked.filter(w=>w.lor&&!w.son).length,onlySun:worked.filter(w=>w.son&&!w.lor).length,both:worked.filter(w=>w.lor&&w.son).length,
+    from:ds[0],to:ds[ds.length-1]};
+}
+
+/* Jule-/nytårshold pr. år – kun visning */
+const HOLD_LBL={jul:'Julehold',nyt:'Nytårshold',ukendt:'Ukendt'};
+const holdFor=y=>(S.settings.hold||{})[y]||'ukendt';
+function holdYears(){const ys=Object.values(S.shifts).map(s=>+s.date.slice(0,4));const now=new Date(utcToL(Date.now())).getUTCFullYear();
+  const lo=Math.min(now,...(ys.length?ys:[now])),hi=Math.max(now+1,...(ys.length?ys:[now]));const r=[];for(let y=lo;y<=hi;y++)r.push(y);return r;}
+function holdBanner(y,m){if(m!==12)return '';const h=holdFor(y);
+  return `<div class="${h==='ukendt'?'note':'infobox'} holdban" style="margin-bottom:8px">🎄 <b>Mit hold i ${y}: ${HOLD_LBL[h]}</b>${h==='ukendt'?' – angiv under Indstillinger → Hertughaven.':''} <span class="small muted">(holdene skifter hvert år – oplyst af dig; appen udleder ingen vagter eller regler af holdet)</span></div>`;}
+
+/* Særaftale – kun notat og vedhæftet fil; appen bruger den ikke til beregninger */
+const SAER_LBL={'':'Ingen',nattevagt:'Nattevagt',sygeplejerske:'Sygeplejerske',anden:'Anden'};
+const hasSaer=()=>{const x=S.settings.saer||{};return !!(x.kind||(x.note||'').trim());};
+/* ===== Visning ===== */
+const now0=utcToL(Date.now());let cur={y:new Date(now0).getUTCFullYear(),m:new Date(now0).getUTCMonth()+1};
+const fmtDate=ds=>ds?ds.slice(8,10)+'-'+ds.slice(5,7)+'-'+ds.slice(0,4):'';
+const fmtDateS=ds=>(+ds.slice(8,10))+'/'+(+ds.slice(5,7));
+const dayRests=ds=>compute().rests.filter(r=>r.date===ds);
+function renderHeader(){$$('.mtitle').forEach(e=>e.textContent=MONTHS[cur.m-1]+' '+cur.y);const st=S.settings;$('#hdrSub').textContent=[st.name,st.job,st.place].filter(Boolean).join(' · ')||'Mine vagter, afvigelser og tjek';}
+function renderCal(){
+  const c=compute();const today=todayL();
+  const first=L(cur.y,cur.m,1),start=first-((wd(first)+6)%7)*D,lastD=L(cur.y,cur.m+1,1)-D;
+  let h='<div class="hd wkh">uge</div>'+['man','tir','ons','tor','fre','lør','søn'].map(x=>`<div class="hd">${x}</div>`).join('');
+  for(let ws=start;ws<=lastD;ws+=7*D){
+    h+=`<div class="wk">${isoWeek(ws).w}</div>`;
+    for(let i=0;i<7;i++){const ms=ws+i*D,ds=lDate(ms),day=c.byDate[ds],hn=holidayName(ds),out=new Date(ms).getUTCMonth()+1!==cur.m;
+      let inner=`<span class="n">${new Date(ms).getUTCDate()}</span>`+(hn?`<span class="hn">${esc(hn)}</span>`:''),badges='';
+      if(day){
+        for(const s of day.shifts){const t=typeInfo(s.type);const kd=shiftKind(s);inner+=`<span class="chip" style="border-color:${t.color}" title="${esc(s.summary)}${kd?' – '+esc(kd.label):''}"><span class="full">${kindBadge(kd)}${s.allDay?esc(t.label):tRange(s)+(t.k==='normal'?'':' <span class="lbl">'+esc(t.label)+'</span>')}</span><span class="short">${kd?kindBadge(kd,true):''}${s.allDay?esc(t.label.slice(0,3)):(s.part?'hel':lTime(parseLIso(s.start)).replace(/^0/,''))}</span></span>`;}
+        if(day.devs.length)badges+=`<span class="dv" title="Afvigelser">${day.devs.length}</span>`;
+        if(dayRests(ds).length)badges+=` <span class="wr" title="Hviletid under grænsen">${dayRests(ds).every(x=>x.ok)?'ⓘ':'⚠'}</span>`;
+      }
+      h+=`<div class="d${out?' out':''}${ds===today?' today':''}${hn?' hol':''}" data-date="${ds}"><div class="badges">${badges}</div>${inner}</div>`;}
+  }
+  $('#cal').innerHTML=h;$('#holdCal').innerHTML=holdBanner(cur.y,cur.m);
+  const used=new Set(Object.values(S.shifts).map(s=>s.type));
+  $('#legend').innerHTML=TYPES.filter(t=>used.has(t.k)).map(t=>`<span style="border-color:${t.color}">${esc(t.label)}</span>`).join('')+(used.size?'<span style="border-color:#fdb022">D/A/N = Dag/Aften/Nat, ? = anden vagt</span><span style="border-color:#7a5af8">tal = afvigelser</span><span style="border-color:#b54708">⚠ = kort hviletid</span>':'');
+  const _empty=!Object.keys(S.shifts).length;$('#emptyHint').classList.add('hide');$('#startCard').classList.toggle('hide',!_empty);$('#calCard').classList.toggle('hide',_empty);
+}
+function renderList(){
+  const c=compute();const only=$('#listOnly').checked;const n=new Date(Date.UTC(cur.y,cur.m,0)).getUTCDate();let h='';
+  for(let d=1;d<=n;d++){const ds=`${cur.y}-${pad(cur.m)}-${pad(d)}`,day=c.byDate[ds],hn=holidayName(ds);
+    if(only&&!day)continue;let it='';
+    if(day){
+      for(const s of day.shifts){const t=typeInfo(s.type);it+=`<div><span class="chip" style="display:inline-block;border-color:${t.color}">${esc(s.summary)}</span> ${kindBadge(shiftKind(s))} ${s.allDay?'<span class="muted">hele dagen</span>':'<b>'+tRange(s)+'</b> <span class="muted small">('+fmtH(s.hours)+' t)</span>'}</div>`;}
+      for(const v of day.devs)it+=`<div class="small"><span class="dv" style="background:${DEV_COLORS[v.type]||'#7a5af8'}">${esc(v.type)}</span> ${v.from?esc(v.from)+'–'+esc(v.to):fmtH(devHours(v))+' t'} ${esc(v.note||'')}</div>`;
+      for(const w of dayRests(ds))it+=`<div class="small" style="color:${w.ok?'var(--info)':'var(--warn)'}">${w.ok?'ⓘ':'⚠'} Hviletid ${fmtH(w.hours)} t før denne vagt${w.ok?'':' – '+esc(restText(w))}</div>`;
+    }
+    if(!it)it='<span class="muted small">–</span>';
+    h+=`<div class="day" data-date="${ds}"><div class="dt"><b>${d}. ${MONTHS[cur.m-1].slice(0,3)}</b><small>${DAYS[wd(parseLD(ds))]}${hn?'<br><span style="color:var(--err)">'+esc(hn)+'</span>':''}</small></div><div class="it">${it}</div><div class="hrs">${day&&(day.planned||day.plus||day.minus)?fmtH(day.net)+' t':''}</div></div>`;}
+  $('#list').innerHTML=h||'<p class="muted">Ingen dage at vise.</p>';$('#holdList').innerHTML=holdBanner(cur.y,cur.m);
+}
+const pct=v=>String(v).replace('.',',')+' %';
+const fmtKr=v=>v.toLocaleString('da-DK',{minimumFractionDigits:2,maximumFractionDigits:2})+' kr.';
+function renderSummary(){
+  const r=monthStats(cur.y,cur.m);const st=S.settings;
+  $('#printHead').textContent=[st.name,st.job,st.place].filter(Boolean).join(' · ');
+  const k=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+  const a4=r.avg4m;
+  $('#holdSum').innerHTML=holdBanner(cur.y,cur.m);
+  const mk={dag:0,aften:0,nat:0,anden:0};for(const d of r.days)for(const s of (compute().byDate[d.date]||{shifts:[]}).shifts){const kd=shiftKind(s);if(kd)mk[kd.k]=(mk[kd.k]||0)+1;}
+  $('#kpis').innerHTML=k(`${mk.dag} / ${mk.aften} / ${mk.nat} / ${mk.anden}`,'Vagttyper: Dag / Aften / Nat / Anden vagt')+k(fmtH(r.planned)+' t','Planlagte timer ('+r.shiftCount+' vagter)')+k('+'+fmtH(r.plus)+' / −'+fmtH(r.minus),'Afvigelser (timer)')+k(fmtH(r.net)+' t','Netto (planlagt ± afvigelser)')+
+    (r.norm!=null?k(fmtH(r.norm)+' t','Normtid i måneden ('+fmtH(normWeek())+' t/uge'+(r.normSh?', −'+r.normSh+' søgnehelligdag'+(r.normSh>1?'e':''):'')+')')+k(fmtH(r.over)+' t','Over normen (overarbejde)'):'')+
+    k(fmtH(r.eve)+' t','Aftentimer ('+r.eveCount+' aftenvagter)')+k(fmtH(r.night)+' t','Nattetimer ('+r.nightCount+' nattevagter)')+k(fmtH(r.sat)+' t','Lørdagstimer')+k(fmtH(r.sh)+' t','Søn- og helligdagstimer (inkl. særlige fridage)')+
+    (r.weekendAfsp?k(fmtH(r.afsp.total)+' t','Afspadsering fra weekendtillæg (lokalaftale)'):'')+(a4?k(fmtH(a4.avg)+' t','Gns. pr. uge over 4 mdr. ('+fmtDateS(a4.from)+'–'+fmtDateS(a4.to)+')'):'')+
+    (r.absPlanned?k(fmtH(r.absPlanned)+' t','Planlagt fravær i vagtplanen (afspadsering/ferie)'):'');
+  let ch='';
+  for(const x of r.rests){const info=x.ok;ch+=`<div class="${info?'infobox':'warnbox'}">${info?'ⓘ Info':'⚠ Advarsel'}: Hviletid <b>${fmtH(x.hours)} timer</b> mellem ${DAYS_S[wd(x.from)]} ${fmtDateS(lDate(x.from))} kl. ${lTime(x.from)} og ${DAYS_S[wd(x.to)]} ${fmtDateS(lDate(x.to))} kl. ${lTime(x.to)} (grænse ${fmtH(+st.rest)} t) – ${esc(restText(x))} (${SRC.hvile}).</div>`;}
+  if(a4&&a4.avg>(+st.weekMax||1e9))ch+=`<div class="warnbox">⚠ Gennemsnit ${fmtH(a4.avg)} t/uge over 4 måneder (${fmtDate(a4.from)}–${fmtDate(a4.to)}) er over ${fmtH(+st.weekMax)} t (${SRC.max48}).</div>`;
+  $('#checks').innerHTML=ch||'<div class="okbox">Ingen advarsler i måneden.</div>';
+  /* Tillæg */
+  const tl=r.timeloen,rt=ratesFor(`${cur.y}-${pad(cur.m)}-15`);
+  const wa=r.weekendAfsp,nc=4+(wa?1:0);
+  let th='<tr><th>Tillæg</th><th class="num">Sats'+(rt?'':' *')+'</th><th class="num">Timer</th><th class="num">Timer (påbeg. ½ t)</th>'+(wa?'<th class="num">Afspadsering (t)</th>':'')+(tl?'<th class="num">Kr. (vejledende)</th>':'')+'</tr>';
+  let sum=0;
+  for(const [key,lbl] of TILLAEG_KEYS){const x=r.tillaeg[key];const we=wa&&WEEKEND_KEYS.includes(key);const label=(key==='sat'?'Lørdag '+satWindow(`${cur.y}-${pad(cur.m)}-15`).join('–'):lbl)+(we?' <span class="pill-lok">lokalaftale: afspadsering</span>':'');if(tl&&x.kr)sum+=x.kr;
+    th+=`<tr><td>${label}</td><td class="num">${rt?pct(rt[key]):'–'}</td><td class="num">${fmtH(x.h)}</td><td class="num">${fmtH(x.hr)}</td>${wa?`<td class="num">${we?fmtH(x.pctH):''}</td>`:''}${tl?`<td class="num">${we?'<span class="muted">afspadsering</span>':x.noRate?'–':fmtKr(x.kr||0)}</td>`:''}</tr>`;}
+  if(wa)th+=`<tr><td colspan="4"><b>Afspadsering fra weekendtillæg</b></td><td class="num"><b>${fmtH(r.afsp.total)} t</b></td>${tl?'<td></td>':''}</tr>`;
+  if(tl)th+=`<tr><td colspan="${nc}"><b>I alt i kr.</b> (timeløn ${fmtKr(tl)} = årsløn/1924${wa?'; weekendtillæg er ikke med – de afspadseres':''})</td><td class="num"><b>${fmtKr(sum)}</b></td></tr>`;
+  $('#tillaeg').innerHTML=th;
+  if(hasSaer()){const x=S.settings.saer;$('#checks').innerHTML+=`<div class="infobox">ⓘ Særaftale noteret (${esc(SAER_LBL[x.kind||'']||'')}). Appen har <b>ikke</b> indregnet den – tjek selv tallene mod din særaftale.</div>`;}
+  renderWeekends();
+  $('#tillaegNote').innerHTML=`Satser i % af timelønnen fra 1.1.2026: aften 17–23 36 %, nat 23–06 40 %, lørdag 06–24 32 %, søn- og helligdage 00–24 50 % – kilde: <b>${SRC.sats}</b>. Tillæggene lægges sammen (fx lørdag aften = 32 % + 36 %). Timer rundes op til påbegyndt halve time pr. arbejdsperiode (${SRC.runding}). 1. maj, Grundlovsdag og 31. dec. kl. 12–24 tæller med søndagssats (${SRC.saerlig}); 24. dec. fra dagstjenestens begyndelse (${SRC.jul}). Søn-/helligdagssats erstatter lørdagssats samme time (${SRC.lorhel}). `+(rt?'':'* Ingen satser i kilderne for perioden før 1.4.2024. ')+(wa?' <b>Lokalaftale (oplyst, ikke set skriftligt):</b> lørdags- og søn-/helligdagstillæg omregnes til afspadsering: timer (rundet op til påbegyndt halve time pr. arbejdsperiode – samme som ved betaling, <i>fortolkning</i>) × sats, fx 1 t lørdag = 0,32 t og 1 t søn-/helligdag = 0,5 t. Afspadsering skal afvikles inden udgangen af 3. måned efter optjeningen, ellers udbetales den (79.01 § 13 stk. 3). ':'')+(tl?'Beløb er vejledende – lønsedlen gælder.':'Indtast årsløn under Indstillinger for at se beløb i kr. – appen viser ingen kronebeløb uden.');
+  /* Overarbejde */
+  $('#overbox').innerHTML=r.norm==null?'<p class="small muted">Angiv ugentlig normtid under Indstillinger.</p>':
+    `<p>Normtid ${fmtH(normWeek())} t/uge → <b>${fmtH(r.norm)} t</b> i ${MONTHS[cur.m-1]}${r.normSh?` (nedskrevet med ${fmtH(normWeek()/5)} t pr. søgnehelligdag × ${r.normSh}, ${SRC.ned})`:''}. Netto ${fmtH(r.net)} t → <b>${fmtH(r.over)} t over normen</b>, som vises som <b>overarbejde</b>: afspadsering 1:1,5 (= ${fmtH(r.over*1.5)} t) eller betaling med timeløn + 50 % (${SRC.over}).${r.overDev?` Heraf registreret som overarbejde-afvigelser: ${fmtH(r.overDev)} t.`:''}</p><p class="small muted">Vejledende: overarbejde gøres endeligt op over opgørelsesperioden og opgøres i påbegyndte halve timer pr. dag. Ferie, sygdom og afspadsering er ikke lagt til normtimerne her.</p>`;
+  const norm=normWeek();
+  $('#weeks').innerHTML='<tr><th>Uge</th><th>Periode</th><th class="num">Planlagt</th><th class="num">Netto</th>'+(norm?'<th class="num">Normtid</th><th class="num">Over normen</th>':'')+(wa?'<th class="num">Afsp. fra weekendtillæg</th>':'')+'</tr>'+r.weeks.map(w=>`<tr><td>${w.w}</td><td>${fmtDateS(w.start)}–${fmtDateS(w.end)}</td><td class="num">${fmtH(w.planned)}</td><td class="num">${fmtH(w.net)}</td>${norm?`<td class="num">${fmtH(w.norm)}</td><td class="num">${w.over?fmtH(w.over):''}</td>`:''}${wa?`<td class="num">${w.afsp?fmtH(w.afsp):''}</td>`:''}</tr>`).join('')+(wa?'<tr><td colspan="9" class="small muted">Ugerne kan gå ind i nabomåneder; månedens sum står i tillægstabellen.</td></tr>':'');
+  const devs=r.days.flatMap(d=>d.devs);
+  $('#devtable').innerHTML=devs.length?'<tr><th>Dato</th><th>Type</th><th>Tid</th><th class="num">Timer</th><th>Effekt</th><th>Note</th></tr>'+devs.map(v=>{const sg=devSign(v);return `<tr><td>${fmtDateS(v.date)}</td><td>${esc(v.type)}</td><td>${v.from?esc(v.from)+'–'+esc(v.to):''}</td><td class="num">${fmtH(devHours(v))}</td><td>${sg>0?'+':sg<0?'−':'0'}</td><td>${esc(v.note||'')}</td></tr>`;}).join('')+`<tr><td colspan="6" class="small muted">I alt pr. type: ${Object.entries(r.devByType).map(([k,v])=>esc(k)+' '+fmtH(v)+' t').join(' · ')}</td></tr>`:'<tr><td class="muted">Ingen afvigelser registreret.</td></tr>';
+  $('#daytable').innerHTML='<tr><th>Dato</th><th>Plan</th><th class="num">Plan t</th><th class="num">±</th><th class="num">Netto</th><th class="num">Aften</th><th class="num">Nat</th><th class="num">Lørdag</th><th class="num">Søn/hellig</th></tr>'+r.days.map(d=>`<tr><td>${DAYS_S[wd(parseLD(d.date))]} ${fmtDateS(d.date)}</td><td>${esc(d.types.join(', '))}${d.times.length?'<br><span class="small muted">'+d.times.join(', ')+'</span>':''}</td><td class="num">${d.planned?fmtH(d.planned):''}</td><td class="num">${d.plus||d.minus?((d.plus-d.minus>=0?'+':'')+fmtH(d.plus-d.minus)):''}</td><td class="num">${d.net?fmtH(d.net):''}</td><td class="num">${d.eve?fmtH(d.eve):''}</td><td class="num">${d.night?fmtH(d.night):''}</td><td class="num">${d.sat?fmtH(d.sat):''}</td><td class="num">${d.sh?fmtH(d.sh):''}</td></tr>`).join('');
+  const sw=st.satMode==='egen'?satWindow('2026-01-01').join('–')+' (eget)':'08–24 før 1.1.2026 / 06–24 fra 1.1.2026';
+  $('#defs').textContent=`Definitioner: aften ${st.eveFrom}–${st.eveTo}, nat ${st.nightFrom}–${st.nightTo}, lørdag ${sw}, søn- og helligdage hele døgnet, særlige fridage som beskrevet ovenfor (kilde: 79.01 §§ 5 og 13). "Antal aften-/nattevagter" tæller vagter med mindst ${fmtH(+st.minWin)} timer i vinduet – det påvirker ikke timer eller tillæg. Timerne beregnes ud fra de faktiske tider efter afvigelser (omlagt vagt, overarbejde, sygdom m.m.). Hviletid regnes mellem arbejdsperioder (pauser under 1 time = samme periode). Planlagte timer = vagter, kursus og overarbejde i vagtplanen; fridøgn, afspadsering og ferie tæller ikke som planlagte timer.`;
+}
+function renderWeekends(){
+  const o=weekendOverview();if(!o){$('#wknd').innerHTML='<p class="small muted">Ingen vagtplan.</p>';return;}
+  const fx=S.settings.weekendFixed||'ingen';const pre=`${cur.y}-${pad(cur.m)}`;
+  const row=w=>`<tr${w.worked?'':' class="muted"'}><td>${w.week}</td><td>${fmtDateS(w.sat)}–${fmtDateS(w.sun)}</td><td>${w.lor?'✔':''}</td><td>${w.son?'✔':''}</td><td class="num">${w.gap!=null?w.gap+' uger':''}</td><td>${!w.covered?'<span class="muted">ikke i planen</span>':w.worked?(w.status==='passer'?'<span style="color:var(--ok,#067647)">passer</span>':w.status==='afviger'?'<span style="color:var(--warn)">afviger</span>':'–'):(w.absence?'fri (fravær)':'fri')}</td><td class="small">${esc(w.notes.join('; '))}</td></tr>`;
+  const th='<tr><th>Uge</th><th>Weekend</th><th>Lør</th><th>Søn</th><th class="num">Afstand</th><th>Rytme</th><th>Bemærkning</th></tr>';
+  const mine=o.list.filter(w=>(w.sat.startsWith(pre)||w.sun.startsWith(pre)));
+  const sug=o.onlySat>o.onlySun?'lørdag':o.onlySun>o.onlySat?'søndag':'ingen tydelig';
+  $('#wknd').innerHTML=`<p class="small">I planen ${fmtDate(o.from)}–${fmtDate(o.to)}: vagt i <b>${o.worked} af ${o.total} weekender</b> med plan${o.uncovered?` (${o.uncovered} weekender uden data i planen er ikke talt med)`:''} = hver <b>${o.every?fmtH(o.every):'–'}.</b> weekend (rytmen er hver 2,5.). Afstand mellem arbejdsweekender: <b>${o.passer} passer</b> (2 eller 3 uger), <b>${o.afviger} afviger</b>. Kun lørdag: ${o.onlySat}, kun søndag: ${o.onlySun}, begge: ${o.both} – planen ligner mest fast <b>${sug}</b>. Din faste weekendvagt: <b>${WKND_LBL[fx]}</b>.</p>
+  <div style="overflow-x:auto"><table>${th}${mine.map(row).join('')||'<tr><td colspan="7" class="muted">Ingen weekender i måneden.</td></tr>'}</table></div>
+  <details style="margin-top:6px"><summary class="small">Vis alle ${o.total} weekender med plan</summary><div style="overflow-x:auto"><table>${th}${o.list.filter(w=>w.covered).map(row).join('')}</table></div></details>
+  <p class="small muted">Kun info – ikke en regel om betaling. "Hver 2,5. weekend" er her tolket som 2 arbejdsweekender pr. 5 uger, dvs. 2 eller 3 ugers afstand. Weekender med vagt = lørdag eller søndag med en vagt (ikke ferie/afspadsering).</p>`;
+}
+function renderHertug(){
+  const st=S.settings;const pats=patterns();
+  $('#patRows').innerHTML=pats.map((p,i)=>`<div><label>${esc(p.label)}</label><input type="time" data-pfrom="${i}" value="${p.from}"> – <input type="time" data-pto="${i}" value="${p.to}"></div>`).join('');
+  const ks=kindStats();const top=Object.entries(ks.andenTimes).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t,n])=>`${t} (${n})`).join(', ');
+  $('#kindStats').innerHTML=ks.total?`Dine vagter i planen: <b>${ks.total}</b> – ${kindBadge({k:'dag',label:'Dag'})} ${ks.dag} · ${kindBadge({k:'aften',label:'Aften'})} ${ks.aften} · ${kindBadge({k:'nat',label:'Nat'})} ${ks.nat} · ${kindBadge({k:'anden',label:'Anden vagt'})} ${ks.anden}${top?` <span class="muted">(hyppigste andre: ${esc(top)})</span>`:''}`:'';
+  $('#sWeekendFixed').value=st.weekendFixed||'ingen';
+  $('#holdRows').innerHTML=holdYears().map(y=>`<div><label>${y}</label><select data-hold="${y}" style="width:100%"><option value="ukendt">Ukendt</option><option value="jul">Julehold</option><option value="nyt">Nytårshold</option></select></div>`).join('');
+  $$('[data-hold]').forEach(s=>s.value=holdFor(+s.dataset.hold));
+  const x=st.saer||{};$('#sSaerKind').value=x.kind||'';$('#sSaerNote').value=x.note||'';
+}
+function saveHertug(){
+  const st=S.settings;
+  st.shiftPatterns=patterns().map((p,i)=>({k:p.k,label:p.label,from:$(`[data-pfrom="${i}"]`).value||p.from,to:$(`[data-pto="${i}"]`).value||p.to}));
+  st.weekendFixed=$('#sWeekendFixed').value||'ingen';
+  st.hold=Object.assign({},st.hold);$$('[data-hold]').forEach(s=>{if(s.value==='ukendt')delete st.hold[s.dataset.hold];else st.hold[s.dataset.hold]=s.value;});
+  st.saer={kind:$('#sSaerKind').value,note:$('#sSaerNote').value};
+}
+function renderSettings(){
+  const st=S.settings;
+  $('#sName').value=st.name||'';$('#sPlace').value=st.place||'';$('#sJob').value=st.job||'';$('#sNorm').value=st.norm||'';$('#sAarsloen').value=st.aarsloen||'';$('#sNightFixed').checked=!!st.nightFixed;$('#sSatMode').value=st.satMode||'aftale';$('#sJulFrom').value=st.julFrom||'07:00';$('#sJulOk').checked=!!st.julOk;$('#sLokWeekend').checked=!!st.lokalWeekendAfsp;$('#julPh').classList.toggle('hide',!!st.julOk);$('#julOkPill').classList.toggle('hide',!st.julOk);renderHertug();
+  $('#sWaiver').checked=!!st.waiver.on;$('#sWaiverDate').value=st.waiver.date||'';$('#sWaiverTo').value=st.waiver.to||'';$('#sWaiverNote').value=st.waiver.note||'';
+  $('#sEveFrom').value=st.eveFrom;$('#sEveTo').value=st.eveTo;$('#sNightFrom').value=st.nightFrom;$('#sNightTo').value=st.nightTo;$('#sSatFrom').value=st.satFrom;$('#sSatTo').value=st.satTo;
+  $('#sRest').value=st.rest;$('#sWeekMax').value=st.weekMax;$('#sMinWin').value=st.minWin;
+  $('#xMaj1').checked=!!st.extra.maj1;$('#xGrund').checked=!!st.extra.grund;$('#xJul').checked=!!st.extra.jul;$('#xNyt').checked=!!st.extra.nyt;
+  $('#devTypeSigns').innerHTML='<div class="grid2">'+DEV_TYPES.map(t=>`<div class="row"><span class="grow">${esc(t)}</span><select data-dsign="${esc(t)}"><option value="1">+ læg til</option><option value="-1">− træk fra</option><option value="0">0 ingen</option></select></div>`).join('')+'</div>';
+  $$('[data-dsign]').forEach(s=>{s.value=String(st.devSigns[s.dataset.dsign]||0);s.onchange=()=>{S.settings.devSigns[s.dataset.dsign]=+s.value;save();toast('Gemt');};});
+  renderDocs();
+}
+function saveSettings(){
+  const st=S.settings;
+  Object.assign(st,{name:$('#sName').value.trim(),place:$('#sPlace').value.trim(),job:$('#sJob').value.trim(),norm:$('#sNorm').value,
+    eveFrom:$('#sEveFrom').value||'17:00',eveTo:$('#sEveTo').value||'23:00',nightFrom:$('#sNightFrom').value||'23:00',nightTo:$('#sNightTo').value||'06:00',satMode:$('#sSatMode').value||'aftale',satFrom:$('#sSatFrom').value||'06:00',satTo:$('#sSatTo').value||'00:00',aarsloen:$('#sAarsloen').value.trim(),nightFixed:$('#sNightFixed').checked,julFrom:$('#sJulFrom').value||'07:00',julOk:$('#sJulOk').checked,lokalWeekendAfsp:$('#sLokWeekend').checked,
+    rest:+$('#sRest').value||11,weekMax:+$('#sWeekMax').value||48,minWin:$('#sMinWin').value===''?2:+$('#sMinWin').value});
+  st.waiver={on:$('#sWaiver').checked,date:$('#sWaiverDate').value,to:$('#sWaiverTo').value,note:$('#sWaiverNote').value};
+  saveHertug();
+  st.extra={maj1:$('#xMaj1').checked,grund:$('#xGrund').checked,jul:$('#xJul').checked,nyt:$('#xNyt').checked};
+  save();renderAll();toast('Indstillinger gemt');
+}
+
+/* ===== Dag-vindue / afvigelser ===== */
+let editDev=null;
+function openDay(ds){
+  const c=compute();const day=c.byDate[ds]||{shifts:[],devs:[],planned:0};const hn=holidayName(ds);
+  let h=`<div class="row"><h2 class="grow" style="text-transform:capitalize">${DAYS[wd(parseLD(ds))]} ${new Date(parseLD(ds)).getUTCDate()}. ${MONTHS[+ds.slice(5,7)-1]} ${ds.slice(0,4)}</h2><button id="dClose" aria-label="Luk">✕</button></div>`;
+  if(hn)h+=`<div class="small" style="color:var(--err)">${esc(hn)}</div>`;
+  h+='<h3>Planlagt</h3>';
+  if(!day.shifts.length)h+='<p class="muted small">Ingen vagt i vagtplanen.</p>';
+  for(const s of day.shifts){const t=typeInfo(s.type);h+=`<div class="devitem" style="border-left:5px solid ${t.color}"><div class="grow"><b>${esc(s.summary)}</b><br>${s.allDay?'Hele dagen':tRange(s)+(s.end.slice(0,10)!==s.date?' (til næste dag)':'')+' · '+fmtH(s.hours)+' t'}${s.corrected?'<br><span class="small muted">Tid rettet for dobbelt tidszone-forskydning</span>':''}</div></div>`;}
+  for(const w of dayRests(ds))h+=`<div class="${w.ok?'infobox':'warnbox'}">${w.ok?'ⓘ':'⚠'} Kun ${fmtH(w.hours)} timers hviletid før denne vagt (fra ${fmtDateS(lDate(w.from))} kl. ${lTime(w.from)}) – ${esc(restText(w))}. Vejledende.</div>`;
+  h+='<h3>Afvigelser</h3>';
+  if(!day.devs.length)h+='<p class="muted small">Ingen afvigelser.</p>';
+  for(const v of day.devs){const sg=devSign(v);h+=`<div class="devitem" style="border-left:5px solid ${DEV_COLORS[v.type]||'#7a5af8'}"><div class="grow"><b>${esc(v.type)}</b> ${v.from?esc(v.from)+'–'+esc(v.to):''} · ${fmtH(devHours(v))} t (${sg>0?'+':sg<0?'−':'0'})${v.note?'<br><span class="small">'+esc(v.note)+'</span>':''}</div><button class="small" data-edit="${v.id}">Ret</button><button class="small danger" data-del="${v.id}">Slet</button></div>`;}
+  const v=editDev?S.devs[editDev]:null;
+  h+=`<h3 id="devFormTitle">${v?'Ret afvigelse':'Ny afvigelse'}</h3>
+  <div class="grid2"><div><label>Type</label><select id="fType" style="width:100%">${DEV_TYPES.map(t=>`<option${v&&v.type===t?' selected':''}>${t}</option>`).join('')}</select></div>
+  <div><label>Timeeffekt</label><select id="fSign" style="width:100%"><option value="">Standard for typen</option><option value="1">+ læg til</option><option value="-1">− træk fra</option><option value="0">0 ingen</option></select></div></div>
+  <div class="grid3" style="margin-top:8px"><div><label>Fra kl.</label><input type="time" id="fFrom" value="${v?esc(v.from||''):''}" style="width:100%"></div><div><label>Til kl.</label><input type="time" id="fTo" value="${v?esc(v.to||''):''}" style="width:100%"></div><div><label>…eller antal timer</label><input type="number" step="0.25" min="0" id="fHours" value="${v&&!v.from&&v.hours!=null?esc(v.hours):''}" style="width:100%"></div></div>
+  <label style="margin-top:8px">Note</label><textarea id="fNote" placeholder="Fx hvem bad om det, årsag, aftalt afspadsering …">${v?esc(v.note||''):''}</textarea>
+  <p class="small muted" id="fHint"></p>
+  <div class="row"><button class="pri" id="fSave">${v?'Gem ændring':'Tilføj afvigelse'}</button>${v?'<button id="fCancel">Annullér</button>':''}</div>`;
+  $('#dayBox').innerHTML=h;$('#dayModal').classList.add('on');
+  if(v&&v.sign!=null)$('#fSign').value=String(v.sign);
+  const hint=()=>{const t=$('#fType').value;$('#fHint').textContent=t==='Omlagt vagt'?'Omlagt vagt: angiv de nye tider – de erstatter dagens planlagte tider i hviletids- og tillægstjek.':(ABS_DEV.includes(t)?'Uden klokkeslæt og timer gælder fraværet hele dagens vagt.':'');};hint();$('#fType').onchange=hint;
+  $('#dClose').onclick=closeDay;
+  $('#fSave').onclick=()=>{
+    const from=$('#fFrom').value,to=$('#fTo').value,hours=$('#fHours').value,type=$('#fType').value;
+    if((from&&!to)||(!from&&to)){toast('Angiv både fra og til – eller antal timer');return;}
+    if(!from&&!hours&&!ABS_DEV.includes(type)&&type!=='Andet'){toast('Angiv tid eller antal timer');return;}
+    const sgv=$('#fSign').value,nowI=new Date().toISOString();
+    const rec={id:editDev||uid(),date:ds,type,from:from||'',to:to||'',hours:from?null:(hours!==''?+hours:null),note:$('#fNote').value.trim(),sign:sgv===''?null:+sgv,updated:nowI,created:editDev&&S.devs[editDev]?S.devs[editDev].created:nowI};
+    if(!from&&hours===''&&ABS_DEV.includes(type))rec.hours=day.planned||0;
+    S.devs[rec.id]=rec;editDev=null;save();renderAll();openDay(ds);toast('Afvigelse gemt');};
+  if($('#fCancel'))$('#fCancel').onclick=()=>{editDev=null;openDay(ds);};
+  $$('[data-edit]',$('#dayBox')).forEach(b=>b.onclick=()=>{editDev=b.dataset.edit;openDay(ds);const t=$('#devFormTitle');if(t&&t.scrollIntoView)t.scrollIntoView({behavior:'smooth'});});
+  $$('[data-del]',$('#dayBox')).forEach(b=>b.onclick=async()=>{if(await uiConfirm('Slet denne afvigelse?')){delete S.devs[b.dataset.del];save();renderAll();openDay(ds);}});
+}
+function closeDay(){$('#dayModal').classList.remove('on');editDev=null;}
+
+/* ===== Vagt-app: hurtig-import, lagringstjek, bekræftelser i appen, PWA ===== */
+const APP_URL='https://destinycomes2-a11y.github.io/Vagt-app/';/* udfyldes når appen er lagt på nettet */
+function uiConfirm(msg){return new Promise(res=>{const m=$('#askModal');if(!m){res(window.confirm(msg));return;}$('#askMsg').textContent=msg;m.classList.add('on');const done=v=>{m.classList.remove('on');$('#askYes').onclick=$('#askNo').onclick=null;res(v);};$('#askYes').onclick=()=>done(true);$('#askNo').onclick=()=>done(false);});}
+function readFileText(f){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=()=>rej(r.error);r.onload=()=>{const t=String(r.result);if(/\uFFFD/.test(t)){const r2=new FileReader();r2.onerror=()=>rej(r2.error);r2.onload=()=>res(String(r2.result));r2.readAsText(f,'windows-1252');}else res(t);};r.readAsText(f,'utf-8');});}
+function goToday(){const n=utcToL(Date.now());cur={y:new Date(n).getUTCFullYear(),m:new Date(n).getUTCMonth()+1};}
+function quickMsg(html){const el=$('#quickResult');if(el)el.innerHTML=html;}
+/* Import i ét trin: samme regler som Import-fanen (automatisk rettelse af dobbelt tidsforskydning, erstat periode), uden ekstra spørgsmål */
+async function quickImportText(name,text){
+  text=String(text||'').replace(/^\uFEFF/,'');
+  if(/^\s*\{/.test(text)&&/"app"\s*:\s*"vagtapp"/.test(text)){await restore(text,!Object.keys(S.shifts).length);return -1;}
+  handleFile(name||'vagtplan.ics',text);
+  const b=buildPending();
+  if(!b||b.error||!b.records.length){pending=null;$('#impOpts').classList.add('hide');showTab('kalender');quickMsg(`<div class="errbox">Kunne ikke læse vagter i <b>${esc(name||'filen')}</b>: ${esc(b&&b.error?b.error:'ingen vagter fundet')}. Vælg den .ics- eller .csv-fil, du har eksporteret fra KMD Opus.</div>`);return 0;}
+  const recs=b.records,timed=recs.filter(r=>shiftKind(r)).length,other=recs.length-timed;
+  const ds=recs.map(r=>r.date).sort();
+  doImport();
+  goToday();showTab('kalender');
+  quickMsg(`<div class="okbox" id="quickOk" style="font-size:16px;padding:12px"><b>✔ ${timed} vagter lagt ind</b>${other?` (+ ${other} fridage, fravær m.m.)`:''} · ${fmtDate(ds[0])}–${fmtDate(ds[ds.length-1])}</div>`);
+  toast(timed+' vagter lagt ind');
+  askPersist();
+  return timed;
+}
+async function quickImportFile(f){if(!f)return;try{const t=await readFileText(f);await quickImportText(f.name,t);}catch(e){quickMsg(`<div class="errbox">Filen kunne ikke åbnes: ${esc(e.message||String(e))}</div>`);}}
+function renderStorageBanner(){
+  const el=$('#storeBanner');if(!el)return;const p=location.protocol,ua=navigator.userAgent||'',msgs=[];
+  const link=APP_URL?` Åbn i stedet <a href="${APP_URL}">${APP_URL}</a> i Chrome og vælg <b>Installér</b>/<b>Føj til startskærm</b>.`:' Brug den installerede Vagt-app i stedet.';
+  if(/; wv\)/.test(ua))msgs.push('Du ser appen inde i en anden app (fx mail-appens forhåndsvisning). Her bliver dine vagter ikke gemt.'+link);
+  else if(p==='content:'||(p==='file:'&&/Android/.test(ua)))msgs.push('Appen er åbnet som en fil på telefonen. Android giver hver åbning sin egen, midlertidige lagerplads, så vagterne kan være væk næste gang.'+link);
+  if(!STORE.ls&&!STORE.idb)msgs.push('Denne visning må ikke gemme data'+(STORE.err?' ('+esc(STORE.err)+')':'')+'. Vagterne forsvinder, når siden lukkes.');
+  el.innerHTML=msgs.map(m=>'<div>⚠️ '+m+'</div>').join('');el.classList.toggle('hide',!msgs.length);
+}
+let _installEvt=null;
+function pwaInit(){
+  ['#quickFile','#quickFileAny'].forEach(s=>{const i=$(s);if(i)i.onchange=e=>{const f=e.target.files[0];e.target.value='';quickImportFile(f);};});
+  renderStorageBanner();
+  loadIdb().then(ch=>{if(ch)renderAll();renderStorageBanner();});
+  if(Object.keys(S.shifts).length)askPersist();
+  const isPwa=!!document.querySelector('link[rel="manifest"]');
+  if(isPwa&&'serviceWorker' in navigator&&window.isSecureContext){
+    navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));
+    if(new URLSearchParams(location.search).has('share'))receiveShare();
+  }
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_installEvt=e;const b=$('#btnInstall');if(b)b.classList.remove('hide');});
+  const hb=document.querySelector('header');if(hb&&isPwa&&!$('#btnInstall')){const b=document.createElement('button');b.id='btnInstall';b.className='small hide';b.textContent='Installér app';b.onclick=async()=>{if(!_installEvt)return;_installEvt.prompt();await _installEvt.userChoice;_installEvt=null;b.classList.add('hide');};hb.appendChild(b);}
+}
+/* Web Share Target: Del → Vagt-app fra Filer/Outlook. Service workeren gemmer filen i cachen og sender os hertil med ?share=1 */
+async function receiveShare(){
+  try{const key=new URL('_share/file',location.origin+location.pathname.replace(/[^/]*$/,'')).href;const c=await caches.open('vagtapp-share');const r=await c.match(key);
+    history.replaceState(null,'',location.pathname);
+    if(!r){quickMsg('<div class="errbox">Den delte fil kom ikke frem. Prøv knappen <b>Hent vagtplan fra KMD</b>.</div>');return;}
+    const name=decodeURIComponent(r.headers.get('x-filename')||'vagtplan.ics');const buf=await r.arrayBuffer();await c.delete(key);
+    let t=new TextDecoder('utf-8').decode(buf);if(/\uFFFD/.test(t))try{t=new TextDecoder('windows-1252').decode(buf);}catch(e){}
+    await quickImportText(name,t);
+  }catch(e){quickMsg(`<div class="errbox">Delt fil kunne ikke læses: ${esc(e.message||String(e))}</div>`);}
+}
+/* ===== Dokumenter (IndexedDB) ===== */
+const DOC_CATS=[{k:'overenskomst',t:'Overenskomst',d:'Din aktuelle overenskomst (FOA/KL).'},{k:'arbejdstid',t:'Arbejdstidsaftale for døgnarbejde (KL/FOA)',d:'Den kommunale aftale om arbejdstid for døgnarbejde.'},{k:'lokal',t:'Lokalaftale(r)',d:'Valgfrit – lokalaftaler for din arbejdsplads.'},{k:'andet',t:'Andre dokumenter',d:'Valgfrit – fx skriftlig aftale om fravigelse af 11-timers reglen.'},{k:'saeraftale',t:'Særaftale – vedhæftet fil',d:'Din individuelle særaftale (gemmes kun lokalt, offline).',box:'#saerDocs'}];
+let _db=null;
+function db(){return _db||(_db=new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('IndexedDB er ikke tilgængelig'));return;}const r=indexedDB.open('vagtapp-docs',1);r.onupgradeneeded=()=>r.result.createObjectStore('docs',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));}
+function tx(mode,fn){return db().then(d=>new Promise((res,rej)=>{const t=d.transaction('docs',mode);const st=t.objectStore('docs');let out;const r=fn(st);if(r)r.onsuccess=()=>out=r.result;t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error);}));}
+const dbAll=()=>tx('readonly',s=>s.getAll());
+const dbPut=o=>tx('readwrite',s=>s.put(o));
+const dbDel=id=>tx('readwrite',s=>s.delete(id));
+const dbClear=()=>tx('readwrite',s=>s.clear());
+const fmtSize=b=>b>1048576?(b/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(b/1024))+' kB';
+async function renderDocs(){
+  let docs=[];try{docs=await dbAll();}catch(e){$('#docCats').innerHTML='<div class="errbox">Dokumenter kan ikke gemmes i denne browser ('+esc(e.message)+').</div>';return;}
+  const html=c=>{const list=docs.filter(d=>d.cat===c.k).sort((a,b)=>a.added.localeCompare(b.added));
+    return `<div style="margin-bottom:14px"><h3 style="margin-bottom:2px">${esc(c.t)}</h3><div class="small muted">${esc(c.d)}</div>
+    ${list.map(d=>`<div class="devitem"><div class="grow" style="min-width:0;word-break:break-word">📄 <b>${esc(d.name)}</b><br><span class="small muted">${fmtSize(d.size)} · tilføjet ${fmtDate(d.added.slice(0,10))}</span></div><button class="small" data-dopen="${d.id}">Åbn</button><button class="small" data-ddl="${d.id}">Hent</button><button class="small danger" data-ddel="${d.id}">Fjern</button></div>`).join('')||'<div class="small muted" style="margin:4px 0">Intet vedhæftet.</div>'}
+    <label class="btn small" style="color:var(--ink);margin-top:4px">+ Vedhæft fil <input type="file" class="hide" data-dcat="${c.k}" multiple accept=".pdf,.doc,.docx,.txt,.odt,.png,.jpg,.jpeg,application/pdf,image/*"></label></div>`;};
+  $('#docCats').innerHTML=DOC_CATS.filter(c=>!c.box).map(html).join('');
+  for(const c of DOC_CATS.filter(c=>c.box)){const el=$(c.box);if(el)el.innerHTML=html(c);}
+  $$('[data-dcat]').forEach(inp=>inp.onchange=async()=>{for(const f of Array.from(inp.files))await dbPut({id:uid(),cat:inp.dataset.dcat,name:f.name,type:f.type||'application/octet-stream',size:f.size,added:new Date().toISOString(),blob:f});toast('Dokument gemt');renderDocs();});
+  const byId=id=>docs.find(d=>d.id===id);
+  $$('[data-dopen]').forEach(b=>b.onclick=()=>{const d=byId(b.dataset.dopen);const u=URL.createObjectURL(d.blob);const w=window.open(u,'_blank');if(!w)dl(d.blob,d.name);});
+  $$('[data-ddl]').forEach(b=>b.onclick=()=>{const d=byId(b.dataset.ddl);dl(d.blob,d.name);});
+  $$('[data-ddel]').forEach(b=>b.onclick=async()=>{if(await uiConfirm('Fjern dokumentet fra appen?')){await dbDel(b.dataset.ddel);renderDocs();}});
+}
+
+/* ===== Eksport ===== */
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+function csvCell(v){v=String(v==null?'':v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function monthCsv(y,m){
+  const r=monthStats(y,m);const st=S.settings;const rows=[];
+  rows.push(['Månedsoversigt',MONTHS[m-1]+' '+y,st.name||'',st.place||'']);
+  rows.push(['VEJLEDENDE beregning – gældende regler står i overenskomst, arbejdstidsaftale og lokalaftale']);
+  rows.push([]);
+  rows.push(['Dato','Ugedag','Helligdag/særlig fridag','Plan','Tider','Planlagte timer','Afvigelser +','Afvigelser −','Netto','Aftentimer','Nattetimer','Lørdagstimer','Søn-/helligdagstimer (inkl. særlige fridage)','Afvigelser (detaljer)']);
+  for(const d of r.days)rows.push([fmtDate(d.date),DAYS[wd(parseLD(d.date))],holidayName(d.date)||'',d.types.join(', '),d.times.join(', '),fmtH2(d.planned),fmtH2(d.plus),fmtH2(d.minus),fmtH2(d.net),fmtH2(d.eve),fmtH2(d.night),fmtH2(d.sat),fmtH2(d.sh),d.devs.map(v=>v.type+' '+(v.from?v.from+'-'+v.to:fmtH(devHours(v))+' t')+(v.note?' ('+v.note+')':'')).join(' | ')]);
+  rows.push(['I alt','','','','',fmtH2(r.planned),fmtH2(r.plus),fmtH2(r.minus),fmtH2(r.net),fmtH2(r.eve),fmtH2(r.night),fmtH2(r.sat),fmtH2(r.sh),'']);
+  rows.push([]);rows.push(['Tillæg (79.01 § 13 stk. 2, s. 12)','Sats','Timer','Timer (påbegyndt halve time)','Kr. (vejledende)']);
+  const rt=ratesFor(`${y}-${pad(m)}-15`);
+  for(const [k,l] of TILLAEG_KEYS){const x=r.tillaeg[k];const we=r.weekendAfsp&&WEEKEND_KEYS.includes(k);rows.push([l,rt?String(rt[k]).replace('.',',')+' %':'',fmtH2(x.h),fmtH2(x.hr),we?'afspadsering (lokalaftale)':(r.timeloen&&!x.noRate?fmtH2(x.kr):'')]);}
+  if(r.weekendAfsp){rows.push([]);rows.push(['Lokalaftale (oplyst, ikke set skriftligt): weekendtillæg som afspadsering','Lørdag (t)','Søn-/helligdag (t)','I alt (t)']);
+    rows.push(['Måned',fmtH2(r.afsp.sat),fmtH2(r.afsp.sh),fmtH2(r.afsp.total)]);
+    for(const w of r.weeks){let sa=0,sh=0;for(let d=parseLD(w.start);d<=parseLD(w.end);d+=D){const dd=compute().byDate[lDate(d)];if(dd){const a=afspOf(dayTillaeg(dd));sa+=a.sat;sh+=a.sh;}}rows.push(['Uge '+w.w+' ('+fmtDate(w.start)+'–'+fmtDate(w.end)+')',fmtH2(sa),fmtH2(sh),fmtH2(sa+sh)]);}
+    rows.push(['Afrunding: timer rundet op til påbegyndt halve time pr. arbejdsperiode før omregning (fortolkning – som ved betaling)']);}
+  if(r.norm!=null){rows.push([]);rows.push(['Normtid i måneden',fmtH2(r.norm)]);rows.push(['Over normen (overarbejde, 1:1,5 / +50 %, 79.01 § 11 stk. 5)',fmtH2(r.over)]);}
+  if(r.avg4m)rows.push(['Gns. pr. uge over 4 måneder',fmtH2(r.avg4m.avg),fmtDate(r.avg4m.from),fmtDate(r.avg4m.to)]);
+  rows.push([]);rows.push(['Antal vagter',r.shiftCount]);rows.push(['Aftenvagter',r.eveCount]);rows.push(['Nattevagter',r.nightCount]);
+  rows.push([]);rows.push(['Uge','Fra','Til','Planlagt','Netto']);for(const w of r.weeks)rows.push([w.w,fmtDate(w.start),fmtDate(w.end),fmtH2(w.planned),fmtH2(w.net)]);
+  rows.push([]);rows.push(['Hviletid under grænse','Fra','Til','Timer','Status']);for(const x of r.rests)rows.push(['',lIso(x.from).replace('T',' '),lIso(x.to).replace('T',' '),fmtH2(x.hours),x.ok?'Info (inden for aftale om fravigelse)':'Advarsel: '+restText(x)]);
+  return '\uFEFF'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n');
+}
+const VTZ=['BEGIN:VTIMEZONE','TZID:Europe/Copenhagen','X-LIC-LOCATION:Europe/Copenhagen','BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE'];
+const icsEsc=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+const icsDT=iso=>iso.replace(/[-:]/g,'')+'00';
+function fold(l){const out=[];while(l.length>74){out.push(l.slice(0,74));l=' '+l.slice(74);}out.push(l);return out.join('\r\n');}
+const fixUid=(u,suf)=>u.includes('@')?u.replace('@','-vagtapp'+suf+'@'):u+'-vagtapp'+suf+'@vagtapp';
+function buildIcs(from,to,allDay,withDevs){
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Vagtplan app//DA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Vagtplan (rettet)','X-WR-TIMEZONE:Europe/Copenhagen',...VTZ];
+  const inR=d=>(!from||d>=from)&&(!to||d<=to);const groups={};
+  for(const s of Object.values(S.shifts)){if(!inR(s.date))continue;
+    if(s.allDay){if(allDay)(groups[s.uid+'\u0001'+s.summary]=groups[s.uid+'\u0001'+s.summary]||[]).push(s.date);continue;}
+    out.push('BEGIN:VEVENT','UID:'+fixUid(s.uid,s.id.includes('#')?'-'+s.date.replace(/-/g,''):''),'DTSTAMP:'+stamp,'DTSTART;TZID=Europe/Copenhagen:'+icsDT(s.start),'DTEND;TZID=Europe/Copenhagen:'+icsDT(s.end),'SUMMARY:'+icsEsc(s.summary),'TRANSP:OPAQUE','END:VEVENT');}
+  for(const [k,dates] of Object.entries(groups)){dates.sort();const [u,summary]=k.split('\u0001');let i=0,n=0;
+    while(i<dates.length){let j=i;while(j+1<dates.length&&dates[j+1]===addDays(dates[j],1))j++;
+      out.push('BEGIN:VEVENT','UID:'+fixUid(u,n?'-'+n:''),'DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+dates[i].replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(dates[j],1).replace(/-/g,''),'SUMMARY:'+icsEsc(summary),'TRANSP:TRANSPARENT','END:VEVENT');i=j+1;n++;}}
+  if(withDevs)for(const v of Object.values(S.devs)){if(!inR(v.date)||!v.from)continue;const [a,b]=devInterval(v);
+    out.push('BEGIN:VEVENT','UID:dev-'+v.id+'@vagtapp','DTSTAMP:'+stamp,'DTSTART;TZID=Europe/Copenhagen:'+icsDT(lIso(a)),'DTEND;TZID=Europe/Copenhagen:'+icsDT(lIso(b)),'SUMMARY:'+icsEsc('Afvigelse: '+v.type),...(v.note?['DESCRIPTION:'+icsEsc(v.note)]:[]),'END:VEVENT');}
+  out.push('END:VCALENDAR');return out.map(fold).join('\r\n')+'\r\n';
+}
+const b64FromBlob=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=()=>rej(r.error);r.readAsDataURL(blob);});
+async function backupObj(withDocs){
+  const o={app:'vagtapp',version:1,exported:new Date().toISOString(),data:S,docs:[]};
+  if(withDocs){try{for(const d of await dbAll())o.docs.push({id:d.id,cat:d.cat,name:d.name,type:d.type,size:d.size,added:d.added,b64:await b64FromBlob(d.blob)});}catch(e){console.warn(e);}}
+  return o;
+}
+async function backup(){const o=await backupObj($('#bkDocs').checked);dl(new Blob([JSON.stringify(o)],{type:'application/json'}),'vagtapp-backup-'+todayL()+'.json');}
+async function restore(text,skipConfirm){
+  let o;try{o=JSON.parse(text);}catch(e){$('#bkResult').innerHTML='<div class="errbox">Filen er ikke en gyldig backup.</div>';return;}
+  if(!o||o.app!=='vagtapp'||!o.data){$('#bkResult').innerHTML='<div class="errbox">Filen er ikke en backup fra denne app.</div>';return;}
+  if(!skipConfirm&&Object.keys(S.shifts).length&&!(await uiConfirm('Gendan backup? Dine nuværende vagter, afvigelser og indstillinger bliver erstattet af backuppens.')))return;
+  S={shifts:o.data.shifts||{},devs:o.data.devs||{},meta:o.data.meta||{},settings:deepMerge(freshSettings(),o.data.settings||{})};migrate(o.data.settings||{});save();
+  let n=0;if(o.docs&&o.docs.length){try{await dbClear();for(const d of o.docs){const bin=atob(d.b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);await dbPut({id:d.id,cat:d.cat,name:d.name,type:d.type,size:d.size,added:d.added,blob:new Blob([u],{type:d.type})});n++;}}catch(e){console.warn(e);}}
+  $('#bkResult').innerHTML=`<div class="okbox">Backup gendannet: ${Object.keys(S.shifts).length} vagter, ${Object.keys(S.devs).length} afvigelser, ${n} dokumenter.</div>`;goToday();showTab('kalender');quickMsg(`<div class="okbox" id="quickOk" style="font-size:16px;padding:12px"><b>✔ Backup gendannet: ${kindStats().total} vagter lagt ind</b></div>`);askPersist();
+}
+
+/* ===== Opsætning ===== */
+let tab='kalender';
+function showTab(t){tab=t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.section').forEach(s=>s.classList.toggle('hide',s.id!=='sec-'+t));renderAll();if(window.scrollTo)try{window.scrollTo(0,0);}catch(e){}}
+function renderAll(){renderHeader();if(tab==='kalender')renderCal();if(tab==='liste')renderList();if(tab==='oversigt')renderSummary();if(tab==='indstillinger')renderSettings();
+  if(tab==='backup'&&!$('#icsFrom').value){const ds=Object.values(S.shifts).map(s=>s.date).sort();if(ds.length){$('#icsFrom').value=ds[0];$('#icsTo').value=ds[ds.length-1];}}}
+function shiftMonth(n){cur.m+=n;if(cur.m<1){cur.m=12;cur.y--;}if(cur.m>12){cur.m=1;cur.y++;}renderAll();}
+function init(){
+  load();
+  $$('#tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+  $$('.mprev').forEach(b=>b.onclick=()=>shiftMonth(-1));$$('.mnext').forEach(b=>b.onclick=()=>shiftMonth(1));
+  $$('.mtoday').forEach(b=>b.onclick=()=>{const n=utcToL(Date.now());cur={y:new Date(n).getUTCFullYear(),m:new Date(n).getUTCMonth()+1};renderAll();});
+  $('#cal').onclick=e=>{const d=e.target.closest('[data-date]');if(d)openDay(d.dataset.date);};
+  $('#list').onclick=e=>{const d=e.target.closest('[data-date]');if(d)openDay(d.dataset.date);};
+  $('#listOnly').onchange=renderList;
+  $('#dayModal').onclick=e=>{if(e.target.id==='dayModal')closeDay();};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDay();});
+  $('#impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const t=String(r.result);if(/\uFFFD/.test(t)){const r2=new FileReader();r2.onload=()=>handleFile(f.name,String(r2.result));r2.readAsText(f,'windows-1252');}else handleFile(f.name,t);};r.readAsText(f,'utf-8');};
+  ['#optFix','#optFixFrom'].forEach(s=>$(s).addEventListener('change',renderPreview));$$('input[name=fixScope]').forEach(r=>r.addEventListener('change',renderPreview));
+  $('#btnDoImport').onclick=doImport;$('#btnCancelImport').onclick=()=>{pending=null;$('#impOpts').classList.add('hide');$('#impFile').value='';};
+  $('#btnSaveSettings').onclick=saveSettings;$('#btnSaveHertug').onclick=saveSettings;
+  $('#btnCsvMonth').onclick=()=>dl(new Blob([monthCsv(cur.y,cur.m)],{type:'text/csv;charset=utf-8'}),`vagter-${cur.y}-${pad(cur.m)}.csv`);
+  $('#btnPrint').onclick=()=>{$('#sec-oversigt').classList.add('printme');window.print();setTimeout(()=>$('#sec-oversigt').classList.remove('printme'),500);};
+  $('#btnIcs').onclick=()=>{if(!Object.keys(S.shifts).length){toast('Ingen vagter at eksportere');return;}dl(new Blob([buildIcs($('#icsFrom').value,$('#icsTo').value,$('#icsAllDay').checked,$('#icsDevs').checked)],{type:'text/calendar;charset=utf-8'}),'vagtplan-rettet.ics');};
+  $('#btnBackup').onclick=backup;
+  $('#bkFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(String(r.result));r.readAsText(f);e.target.value='';};
+  $('#btnClearShifts').onclick=async()=>{if(await uiConfirm('Slet alle importerede vagter? Afvigelser og dokumenter bevares.')){S.shifts={};save();renderAll();toast('Vagter slettet');}};
+  $('#btnClearAll').onclick=async()=>{if(await uiConfirm('Slet ALT i appen på denne enhed? Det kan ikke fortrydes, medmindre du har en backup.')){try{localStorage.removeItem(KEY);}catch(e){}await idbStateDel();try{await dbClear();}catch(e){}S={shifts:{},devs:{},settings:freshSettings(),meta:{}};invalidate();renderAll();toast('Alt slettet');}};
+  pwaInit();
+  renderAll();
+}
+window.VagtApp={get S(){return S;},handleFile,doImport,compute,monthStats,buildIcs,monthCsv,csvToRecords,parseIcs,icsToRecords,openDay,closeDay,showTab,setMonth:(y,m)=>{cur={y,m};renderAll();},holidays,specialDays,holidayName,periodHours,ratesFor,satWindow,normFor,avg4m,shiftKind,kindStats,weekendOverview,holdFor,timeloen,roundHalf,load,save,backupObj,restore,renderAll,quickImportText,uiConfirm,loadIdb,get STORE(){return STORE;}};
+init();
+</script>
+</body>
+</html>
