@@ -1,5 +1,5 @@
 /* Vagt-app service worker: offline-cache + modtagelse af delte filer (Web Share Target) */
-const VERSION='0dcdb55d64';
+const VERSION='210993e976';
 const CACHE='vagtapp-'+VERSION;
 const SHARE='vagtapp-share';
 const ASSETS=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-192.png','icons/maskable-512.png','icons/apple-touch-icon.png','icons/favicon-48.png'];
@@ -7,6 +7,7 @@ self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('vagtapp-')&&k!==CACHE&&k!==SHARE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{
   const req=e.request,url=new URL(req.url);
+  /* Andre domæner (Google Identity, Calendar API) må ikke caches – appen skal kunne åbne offline. */
   if(url.origin!==location.origin)return;
   if(req.method==='POST'&&url.pathname.endsWith('/share-target')){e.respondWith(takeShare(req));return;}
   if(req.method!=='GET')return;

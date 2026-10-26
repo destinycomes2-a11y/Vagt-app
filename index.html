@@ -143,7 +143,11 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <div id="quickResult"></div>
   <div class="card hide" id="startCard">
     <h2 style="margin-top:0">Velkommen til Vagt-app</h2>
-    <p>Eksportér din vagtplan fra KMD Opus (filen ender på <b>.ics</b> eller <b>.csv</b>) og vælg den her. Vagterne bliver lagt direkte ind i kalenderen.</p>
+    <p>Hent vagtplanen fra Google Kalender, eller eksportér den fra KMD Opus (filen ender på <b>.ics</b> eller <b>.csv</b>) og vælg filen her. Vagterne lægges ind i kalenderen og gemmes kun på denne enhed.</p>
+    <button class="pri bigbtn" id="btnGoogleConnectStart" data-gconnect>Forbind Google Kalender</button>
+    <p class="small muted" id="googleSetupStart">For at hente direkte fra Google skal OAuth-klient-id sættes i appen (konstanten GOOGLE_CLIENT_ID). Se README. Indtil da virker fil-importen herunder.</p>
+    <p class="small" id="googleStatusStart" data-gstatus></p>
+    <button class="small hide" id="btnGoogleSyncStart" data-gsync>Opdater fra Google</button>
     <label for="quickFile" class="btn pri bigbtn" id="btnQuick" role="button">📅 Hent vagtplan fra KMD</label>
     <p class="small muted" style="margin-top:12px">Filen kan ligge i <b>Filer/Downloads</b> eller være gemt fra en mail. Kan du ikke vælge filen? <label for="quickFileAny" class="linklbl">Vis alle filer</label>.</p>
     <p class="small muted">Har du en backup-fil (.json)? Brug <b>Eksport &amp; backup → Gendan fra backup</b>.</p>
@@ -151,7 +155,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <input type="file" id="quickFile" accept=".ics,.csv,text/calendar,text/csv" class="vh">
   <input type="file" id="quickFileAny" class="vh">
   <div class="card" id="calCard">
-    <div class="row noprint" style="justify-content:flex-end;margin-bottom:6px"><label for="quickFile" class="btn small" id="btnQuickSmall" role="button">📅 Hent ny vagtplan fra KMD</label></div>
+    <div class="row noprint" style="justify-content:space-between;margin-bottom:6px">
+      <div class="row">
+        <button class="small" id="btnGoogleConnectTop" data-gconnect>Forbind Google Kalender</button>
+        <button class="small hide" id="btnGoogleSyncTop" data-gsync>Opdater fra Google</button>
+        <span class="small muted" id="googleStatusTop" data-gstatus></span>
+      </div>
+      <label for="quickFile" class="btn small" id="btnQuickSmall" role="button">📅 Hent ny vagtplan fra KMD</label>
+    </div>
     <div class="monthbar">
       <button class="mprev" aria-label="Forrige måned">‹</button>
       <h2 class="mtitle"></h2>
@@ -210,9 +221,26 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   </div>
 </section>
 <section class="section hide" id="sec-import">
+  <div class="card" id="googleCard">
+    <h2>Google Kalender</h2>
+    <p class="small muted">Hent vagterne direkte fra din Google-kalender (kun læseadgang). De gemmes kun på denne enhed – appen har ingen server. Fil-importen nedenfor er reserven, hvis Google ikke er forbundet.</p>
+    <div id="googleSetup" class="note">Google Kalender er ikke sat op endnu. Sæt OAuth-klient-id i konstanten <b>GOOGLE_CLIENT_ID</b> (erstat <b>INDSÆT_CLIENT_ID</b>). Se README for trinnene i Google Cloud Console. Indtil da kan du importere en .ics- eller .csv-fil herunder.</div>
+    <div class="row" style="margin-top:10px">
+      <button class="pri" id="btnGoogleConnect" data-gconnect="keep">Forbind Google Kalender</button>
+      <button id="btnGoogleSync" data-gsync class="hide">Opdater fra Google</button>
+    </div>
+    <div id="googlePick" class="hide" style="margin-top:10px">
+      <label for="googleCal">Kalender</label>
+      <select id="googleCal" style="width:100%;max-width:480px"></select>
+      <p class="small muted">Hvis en kalender hedder noget med 540_647360, vælges den automatisk. Valget huskes på enheden.</p>
+    </div>
+    <div id="googleNotice" class="hide" style="margin-top:10px"></div>
+    <p class="small muted" id="googleStatus" data-gstatus style="margin-top:8px"></p>
+    <p class="small muted">Vagterne køres gennem den samme indlæsning som en .ics-fil, så rettelsen af den kendte tidsforskydning og genkendelsen af vagttyper er den samme. Dine afvigelser bliver ikke slettet.</p>
+  </div>
   <div class="card">
     <h2>Importér vagtplan</h2>
-    <p class="small muted">Eksportér din vagtplan fra KMD Opus (eller din Google-kalender) som <b>.ics</b> eller <b>.csv</b> og vælg filen her. Filen bliver kun læst på din egen telefon/computer – intet sendes nogen steder hen. Ved ny import flettes vagterne ind; dine afvigelser bliver aldrig slettet.</p>
+    <p class="small muted">Eksportér din vagtplan fra KMD Opus (eller din Google-kalender) som <b>.ics</b> eller <b>.csv</b> og vælg filen her. Filen bliver kun læst på din egen telefon/computer – intet sendes nogen steder hen. Ved ny import flettes vagterne ind; dine afvigelser bliver aldrig slettet. Fil-importen virker også, når Google ikke er forbundet.</p>
     <input type="file" id="impFile" accept=".ics,.csv,.txt,text/calendar,text/csv">
     <div id="impOpts" class="hide" style="margin-top:12px">
       <div id="tzOpts">
@@ -352,7 +380,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <button class="danger" id="btnClearAll">Slet ALT (vagter, afvigelser, dokumenter, indstillinger)</button>
     </div>
   </div>
-  <p class="small muted" style="text-align:center">Vagtplan v1 · virker offline · data forlader ikke din enhed</p>
+  <p class="small muted" style="text-align:center">Vagtplan v1 · virker offline · vagter gemmes kun på enheden</p>
 </section>
 </main>
 <div class="modal" id="dayModal" role="dialog" aria-modal="true"><div class="box" id="dayBox"></div></div>
@@ -360,6 +388,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 <div class="modal" id="askModal" role="dialog" aria-modal="true"><div class="box" style="max-width:420px;margin-top:20vh"><p id="askMsg" style="margin-top:0"></p><div class="row" style="justify-content:flex-end;gap:8px"><button id="askNo">Annullér</button><button id="askYes" class="pri">OK</button></div></div></div>
 <script>
 'use strict';
+/* OAuth-klient-id til Google Kalender (typen Web application). Erstat pladsholderen – se README. */
+const GOOGLE_CLIENT_ID = 'INDSÆT_CLIENT_ID';
+const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 /* ===== Basics ===== */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -643,19 +674,30 @@ function renderPreview(){
   h+=`</table></div><p class="small muted">Typer: ${Object.entries(types).map(([k,v])=>esc(k)+' ('+v+')').join(', ')}</p>`;
   el.innerHTML=h;
 }
-function doImport(){
-  const b=buildPending();if(!b||!b.records.length)return;
-  const ids=new Set(b.records.map(r=>r.id));let added=0,updated=0,removed=0;
-  if($('#optReplace').checked){
-    const ds=b.records.map(r=>r.date).sort();const lo=ds[0],hi=ds[ds.length-1],src=b.records[0].source;
+function shiftContentKey(r){return [r.date,r.start||'',r.end||'',r.hours,r.allDay?1:0,r.summary,r.type,r.corrected?1:0].join('\u0001');}
+/* Flet planlagte vagter ind. Afvigelser (S.devs) røres ikke. Samme regler som fil-import: erstat kun samme kilde inden for perioden. */
+function mergeShiftRecords(records, replace){
+  const ids=new Set(records.map(r=>r.id));let added=0,updated=0,changed=0,removed=0;
+  if(replace&&records.length){
+    const ds=records.map(r=>r.date).sort();const lo=ds[0],hi=ds[ds.length-1],src=records[0].source;
     for(const [id,s] of Object.entries(S.shifts))if(s.source===src&&s.date>=lo&&s.date<=hi&&!ids.has(id)){delete S.shifts[id];removed++;}
   }
   const now=new Date().toISOString();
-  for(const r of b.records){if(S.shifts[r.id])updated++;else added++;S.shifts[r.id]=Object.assign(r,{importedAt:now});}
+  for(const r of records){
+    const prev=S.shifts[r.id];
+    if(prev){updated++;if(shiftContentKey(prev)!==shiftContentKey(r))changed++;}
+    else added++;
+    S.shifts[r.id]=Object.assign({},r,{importedAt:now});
+  }
+  return {added,updated,changed,removed,at:now};
+}
+function doImport(){
+  const b=buildPending();if(!b||!b.records.length)return;
+  const m=mergeShiftRecords(b.records,$('#optReplace').checked);
   if(pending.kind==='ics'){S.settings.fixTZ=b.opts.fix;S.settings.fixScope=b.opts.scope;S.settings.fixFrom=b.opts.from;}
-  S.meta.lastImport={at:now,file:pending.name,added,updated,removed};
+  S.meta.lastImport={at:m.at,file:pending.name,added:m.added,updated:m.updated,removed:m.removed};
   save();
-  $('#impResult').innerHTML=`<div class="okbox">Importeret: ${added} nye, ${updated} opdateret, ${removed} fjernet. Dine afvigelser er bevaret.</div>`;
+  $('#impResult').innerHTML=`<div class="okbox">Importeret: ${m.added} nye, ${m.updated} opdateret, ${m.removed} fjernet. Dine afvigelser er bevaret.</div>`;
   $('#impOpts').classList.add('hide');pending=null;$('#impFile').value='';
   renderAll();toast('Vagtplan importeret');
 }
@@ -1062,6 +1104,240 @@ function openDay(ds){
 }
 function closeDay(){$('#dayModal').classList.remove('on');editDev=null;}
 
+/* ===== Google Kalender (kun i browseren; samme ICS-pipeline) ===== */
+const GOOGLE_SYNC_MS=6*H;
+const GOOGLE_SETUP_MSG='Google Kalender er ikke sat op endnu. Sæt OAuth-klient-id i konstanten GOOGLE_CLIENT_ID (erstat INDSÆT_CLIENT_ID). Se README. Du kan stadig hente vagtplanen som fil.';
+let googleCals=null,googleSyncing=false,googleSilentFailed=false,googleFilling=false,googleNotice='',googleNoticeKind='',googleQuietHint='';
+let _gToken='',_gTokenAt=0,_gClient=null,_gScript=null;
+function googleConfigured(){return typeof GOOGLE_CLIENT_ID==='string'&&GOOGLE_CLIENT_ID.length>0&&GOOGLE_CLIENT_ID!=='INDSÆT_CLIENT_ID';}
+function fmtStamp(iso){const d=new Date(iso);if(!iso||isNaN(d.getTime()))return '';return pad(d.getDate())+'-'+pad(d.getMonth()+1)+'-'+d.getFullYear()+' kl. '+pad(d.getHours())+':'+pad(d.getMinutes());}
+function icsEscapeText(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/\r\n|\n|\r/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');}
+function rfc3339ToIcsUtc(s){const d=new Date(s);if(!s||isNaN(d.getTime()))return null;return d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');}
+function icsDateOnly(s){const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?m[1]+m[2]+m[3]:null;}
+/* Gentagelser deler iCalUID hos Google. ICS-importen nøgler på UID, så hver instans får sit eget UID og falder ikke sammen. */
+function googleEventUid(ev){
+  const base=String(ev.iCalUID||ev.id||('gcal-'+(ev.summary||'event'))).replace(/[\r\n]/g,'');
+  if(ev.recurringEventId){const inst=(ev.originalStartTime&&(ev.originalStartTime.dateTime||ev.originalStartTime.date))||ev.id||'';return base+'#'+String(inst).replace(/[\r\n]/g,'');}
+  return base;
+}
+/* Byg den samme slags ICS, som feedet giver: klokkeslæt som UTC-instans (Z) – også når API'et sender dateTime med offset.
+   Rettelsen for dobbelt UTC (for tidligt: −2 t sommertid, −1 t vintertid; heldag urørt) sker bagefter i icsToRecords. */
+function googleEventsToIcs(events){
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Vagt-app//Google Calendar//DA','CALSCALE:GREGORIAN'];
+  for(const ev of events||[]){
+    if(!ev||!ev.start)continue;
+    const ve=['BEGIN:VEVENT','UID:'+googleEventUid(ev)];
+    if(ev.created){const c=rfc3339ToIcsUtc(ev.created);if(c)ve.push('CREATED:'+c);}
+    if(ev.status&&/cancelled/i.test(ev.status))ve.push('STATUS:CANCELLED');
+    if(ev.start.date&&!ev.start.dateTime){
+      const ds=icsDateOnly(ev.start.date);if(!ds)continue;
+      ve.push('DTSTART;VALUE=DATE:'+ds);
+      const de=ev.end&&ev.end.date&&icsDateOnly(ev.end.date);if(de)ve.push('DTEND;VALUE=DATE:'+de);
+    }else if(ev.start.dateTime){
+      const ds=rfc3339ToIcsUtc(ev.start.dateTime);if(!ds)continue;
+      ve.push('DTSTART:'+ds);
+      if(ev.end&&ev.end.dateTime){const de=rfc3339ToIcsUtc(ev.end.dateTime);if(de)ve.push('DTEND:'+de);}
+    }else continue;
+    ve.push('SUMMARY:'+icsEscapeText(ev.summary||'(uden titel)'));
+    if(ev.description)ve.push('DESCRIPTION:'+icsEscapeText(ev.description));
+    ve.push('END:VEVENT');
+    lines.push.apply(lines,ve);
+  }
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n')+'\r\n';
+}
+function googleFixOpts(opt){
+  if(opt)return {fix:!!opt.fix,scope:opt.scope||'created',from:opt.from||''};
+  const st=S.settings||{};
+  return {fix:st.fixTZ!==false,scope:st.fixScope||'created',from:st.fixFrom||''};
+}
+function googleEventsToRecords(events, opt){return icsToRecords(parseIcs(googleEventsToIcs(events)), googleFixOpts(opt));}
+function pickDefaultCalendar(cals){
+  const list=cals||[];
+  const saved=S.meta&&S.meta.google&&S.meta.google.calendarId;
+  if(saved){const f=list.find(c=>c.id===saved);if(f)return f;}
+  return list.find(c=>String(c.summary||'').includes('540_647360'))||null;
+}
+function loadGsi(){
+  if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();
+  if(_gScript)return _gScript;
+  _gScript=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.async=true;
+    s.onload=()=>{if(window.google&&google.accounts&&google.accounts.oauth2)res();else{_gScript=null;const e=new Error('gsi');e.code='gsi';rej(e);}};
+    s.onerror=()=>{_gScript=null;const e=new Error('gsi');e.code='gsi';rej(e);};
+    document.head.appendChild(s);
+  });
+  return _gScript;
+}
+function getGoogleToken(opt){
+  opt=opt||{};
+  if(_gToken&&Date.now()-_gTokenAt<50*60*1000)return Promise.resolve(_gToken);
+  return loadGsi().then(()=>new Promise((res,rej)=>{
+    try{
+      if(!(window.google&&google.accounts&&google.accounts.oauth2)){const e=new Error('gsi');e.code='gsi';rej(e);return;}
+      if(!_gClient){_gClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:GOOGLE_CALENDAR_SCOPE,callback:()=>{}});}
+      _gClient.callback=(resp)=>{
+        if(!resp||resp.error){const e=new Error(resp&&resp.error||'auth');e.code=resp&&resp.error;e.silent=!!opt.silent;rej(e);return;}
+        _gToken=resp.access_token;_gTokenAt=Date.now();res(_gToken);
+      };
+      if(opt.silent)_gClient.requestAccessToken({prompt:''});
+      else if(opt.interactive)_gClient.requestAccessToken({prompt:'select_account'});
+      else _gClient.requestAccessToken();
+    }catch(e){rej(e);}
+  }));
+}
+async function googleApiList(base, token, params){
+  const items=[];let pageToken='',guard=0;
+  do{
+    if(++guard>50)break;
+    const u=new URL(base);
+    for(const k in params)if(params[k]!=null)u.searchParams.set(k,params[k]);
+    if(pageToken)u.searchParams.set('pageToken',pageToken);
+    const r=await fetch(u.toString(),{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+    if(r.status===401){_gToken='';_gTokenAt=0;}
+    if(!r.ok){const e=new Error('Google-kalender svarede med fejl '+r.status);e.status=r.status;throw e;}
+    const j=await r.json();
+    if(Array.isArray(j.items))items.push.apply(items,j.items);
+    pageToken=j.nextPageToken||'';
+  }while(pageToken);
+  return items;
+}
+function fetchGoogleCalendars(token){return googleApiList('https://www.googleapis.com/calendar/v3/users/me/calendarList',token,{maxResults:'250'}).then(list=>list.slice().sort((a,b)=>String(a.summary||'').localeCompare(String(b.summary||''),'da')));}
+function fetchGoogleEvents(calendarId, token){
+  const timeMin=new Date(Date.now()-60*D).toISOString();
+  const timeMax=new Date(Date.now()+365*D).toISOString();
+  return googleApiList('https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(calendarId)+'/events',token,{singleEvents:'true',orderBy:'startTime',timeMin,timeMax,maxResults:'2500'});
+}
+function googleErrText(e){
+  const code=(e&&(e.code||e.status))||'';
+  const raw=String(e&&e.message||'');
+  if(code==='gsi'||raw==='gsi')return 'Google-scriptet kunne ikke hentes. Tjek internetforbindelsen. Appen virker stadig, og du kan importere en .ics-fil.';
+  if(code==='interaction_required'||code==='login_required'||code==='consent_required')return 'Log ind via Opdater fra Google for at hente vagterne.';
+  if(code==='popup_closed_by_user'||code==='access_denied')return 'Forbindelsen til Google blev annulleret.';
+  if(code==='popup_failed_to_open')return 'Browseren blokerede vinduet til Google. Tillad pop op-vinduer og prøv igen.';
+  if(code===401||e&&e.status===401)return 'Google-login er udløbet. Tryk på Opdater fra Google.';
+  if(code===403||e&&e.status===403)return 'Google afviste adgangen til kalenderen. Tjek at Calendar API er slået til, og at du er testbruger på samtykkeskærmen.';
+  if(/origin|client.?id|idpiframe/i.test(raw))return 'Google afviste login. Tjek at OAuth-klienten er en webklient, og at '+location.origin+' står som Authorized JavaScript origin.';
+  if(typeof navigator!=='undefined'&&navigator&&navigator.onLine===false)return 'Ingen internetforbindelse. Vagterne på enheden er gemt. Du kan importere en fil, eller prøve igen når du er online.';
+  return 'Kunne ikke hente fra Google Kalender. Prøv igen, eller brug fil-import.';
+}
+function applyGoogleNotice(){
+  const el=$('#googleNotice');if(!el)return;
+  const setup=$('#googleSetup');
+  const dup=!!(googleNotice&&googleNotice===GOOGLE_SETUP_MSG&&setup&&!setup.classList.contains('hide'));
+  const msg=dup?'':googleNotice;
+  el.className=msg?(googleNoticeKind==='ok'?'okbox':googleNoticeKind==='err'?'errbox':'warnbox'):'hide';
+  el.textContent=msg||'';
+  if(!msg)el.classList.add('hide');
+}
+function showGoogleNotice(msg, kind){
+  googleNotice=msg||'';googleNoticeKind=kind||(msg?'warn':'');
+  applyGoogleNotice();
+  const q=$('#quickResult');
+  if(q&&msg&&tab==='kalender')q.innerHTML='<div class="'+(googleNoticeKind==='ok'?'okbox':googleNoticeKind==='err'?'errbox':'warnbox')+'">'+esc(msg)+'</div>';
+}
+function googleStatusLine(){
+  const g=S.meta&&S.meta.google;const parts=[];
+  if(g&&g.calendarSummary)parts.push(g.calendarSummary);
+  if(g&&g.lastSync){
+    const n=g.added||0,c=g.changed||0,rm=g.removed||0;
+    parts.push('Sidst opdateret: '+fmtStamp(g.lastSync)+' · '+n+' '+(n===1?'ny':'nye')+', '+c+' ændret'+(rm?' · '+rm+' fjernet':''));
+  }
+  if(googleSyncing)parts.push('Henter vagter fra Google…');
+  else if(googleQuietHint)parts.push(googleQuietHint);
+  return parts.join(' · ');
+}
+function renderGoogleUi(){
+  const ok=googleConfigured();
+  const g=(S.meta&&S.meta.google)||{};
+  const connected=!!g.calendarId;
+  const setup=$('#googleSetup');if(setup)setup.classList.toggle('hide',ok);
+  const setupS=$('#googleSetupStart');if(setupS)setupS.classList.toggle('hide',ok);
+  $$('[data-gstatus]').forEach(el=>{el.textContent=googleStatusLine();});
+  $$('[data-gconnect]').forEach(b=>{b.classList.toggle('hide',connected&&b.getAttribute('data-gconnect')!=='keep');b.disabled=!!googleSyncing;});
+  $$('[data-gsync]').forEach(b=>{b.classList.toggle('hide',!connected);b.disabled=!!googleSyncing;});
+  const sel=$('#googleCal'),pick=$('#googlePick');
+  if(sel&&pick){
+    if(googleCals&&googleCals.length){
+      const sig=googleCals.map(c=>c.id).join('\n');
+      if(sel.dataset.sig!==sig){
+        googleFilling=true;
+        sel.innerHTML='<option value="">Vælg kalender…</option>'+googleCals.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.summary||c.id)+'</option>').join('');
+        sel.dataset.sig=sig;
+        googleFilling=false;
+      }
+      const want=g.calendarId||'';
+      if(sel.value!==want&&[...sel.options].some(o=>o.value===want)){googleFilling=true;sel.value=want;googleFilling=false;}
+      pick.classList.remove('hide');
+    }else pick.classList.add('hide');
+  }
+  applyGoogleNotice();
+}
+async function connectGoogle(){
+  if(!googleConfigured()){showGoogleNotice(GOOGLE_SETUP_MSG,'warn');renderGoogleUi();return;}
+  if(googleSyncing)return;
+  googleSyncing=true;googleQuietHint='';renderGoogleUi();
+  try{
+    const token=await getGoogleToken({interactive:true});
+    googleCals=await fetchGoogleCalendars(token);
+    const chosen=pickDefaultCalendar(googleCals);
+    S.meta=S.meta||{};
+    if(chosen){S.meta.google=Object.assign({},S.meta.google||{},{calendarId:chosen.id,calendarSummary:chosen.summary||''});save();}
+    googleSyncing=false;renderGoogleUi();
+    if(!googleCals.length){showGoogleNotice('Ingen kalendere fundet på Google-kontoen.','warn');return;}
+    if(chosen)await syncFromGoogle({silent:false,calendarId:chosen.id,token});
+    else showGoogleNotice('Vælg den kalender, der indeholder vagtplanen.','warn');
+  }catch(e){googleSyncing=false;showGoogleNotice(googleErrText(e),'err');renderGoogleUi();}
+}
+async function syncFromGoogle(o){
+  o=o||{};
+  if(googleSyncing)return;
+  if(!googleConfigured()){if(!o.silent)showGoogleNotice(GOOGLE_SETUP_MSG,'warn');renderGoogleUi();return;}
+  const g=(S.meta&&S.meta.google)||{};
+  const calendarId=o.calendarId||g.calendarId;
+  if(!calendarId){if(!o.silent)showGoogleNotice('Forbind Google Kalender og vælg en kalender først.','warn');return;}
+  googleSyncing=true;
+  if(!o.silent)googleQuietHint='';
+  renderGoogleUi();
+  try{
+    const token=o.token||await getGoogleToken({silent:!!o.silent,interactive:false});
+    const events=await fetchGoogleEvents(calendarId, token);
+    const built=googleEventsToRecords(events);
+    const summary=((googleCals||[]).find(c=>c.id===calendarId)||{}).summary||g.calendarSummary||'';
+    if(!built.records.length){
+      const now=new Date().toISOString();
+      S.meta.google=Object.assign({},g,{calendarId,calendarSummary:summary,lastSync:now,added:0,changed:0,removed:0,updated:0});
+      save();googleSilentFailed=false;googleQuietHint='';
+      if(!o.silent)showGoogleNotice('Ingen vagter i den valgte kalender i perioden (ca. 60 dage tilbage og 1 år frem). Eksisterende vagter er ikke slettet.','warn');
+      return;
+    }
+    const m=mergeShiftRecords(built.records,true);
+    S.meta.google=Object.assign({},g,{calendarId,calendarSummary:summary,lastSync:m.at,added:m.added,changed:m.changed,removed:m.removed,updated:m.updated});
+    S.meta.lastImport={at:m.at,file:'Google Kalender: '+(summary||calendarId),added:m.added,updated:m.changed,removed:m.removed};
+    save();googleSilentFailed=false;googleQuietHint='';
+    const line=m.added+' '+(m.added===1?'ny':'nye')+', '+m.changed+' ændret'+(m.removed?' · '+m.removed+' fjernet':'');
+    if(!o.silent){showGoogleNotice('Hentet fra Google. '+line+'.','ok');toast(line);}
+    else if(m.added||m.changed||m.removed)toast(line);
+    renderAll();
+  }catch(e){
+    if(o.silent){googleSilentFailed=true;googleQuietHint='Automatisk opdatering lykkedes ikke. Tryk på Opdater fra Google.';}
+    else showGoogleNotice(googleErrText(e),'err');
+  }finally{googleSyncing=false;renderGoogleUi();}
+}
+function maybeAutoSync(){
+  try{
+    if(googleSyncing||googleSilentFailed)return;
+    if(!googleConfigured())return;
+    const g=S.meta&&S.meta.google;
+    if(!g||!g.calendarId)return;
+    const last=g.lastSync?Date.parse(g.lastSync):0;
+    if(last&&Date.now()-last<GOOGLE_SYNC_MS)return;
+    syncFromGoogle({silent:true});
+  }catch(e){console.warn(e);}
+}
+
 /* ===== Vagt-app: hurtig-import, lagringstjek, bekræftelser i appen, PWA ===== */
 const APP_URL='https://destinycomes2-a11y.github.io/Vagt-app/';/* udfyldes når appen er lagt på nettet */
 function uiConfirm(msg){return new Promise(res=>{const m=$('#askModal');if(!m){res(window.confirm(msg));return;}$('#askMsg').textContent=msg;m.classList.add('on');const done=v=>{m.classList.remove('on');$('#askYes').onclick=$('#askNo').onclick=null;res(v);};$('#askYes').onclick=()=>done(true);$('#askNo').onclick=()=>done(false);});}
@@ -1097,7 +1373,11 @@ let _installEvt=null;
 function pwaInit(){
   ['#quickFile','#quickFileAny'].forEach(s=>{const i=$(s);if(i)i.onchange=e=>{const f=e.target.files[0];e.target.value='';quickImportFile(f);};});
   renderStorageBanner();
-  loadIdb().then(ch=>{if(ch)renderAll();renderStorageBanner();});
+  loadIdb().then(ch=>{if(ch)renderAll();renderStorageBanner();maybeAutoSync();});
+  window.addEventListener('focus',maybeAutoSync);
+  window.addEventListener('pageshow',maybeAutoSync);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')maybeAutoSync();});
+  window.addEventListener('online',()=>{googleSilentFailed=false;maybeAutoSync();});
   if(Object.keys(S.shifts).length)askPersist();
   const isPwa=!!document.querySelector('link[rel="manifest"]');
   if(isPwa&&'serviceWorker' in navigator&&window.isSecureContext){
@@ -1206,7 +1486,8 @@ async function restore(text,skipConfirm){
 let tab='kalender';
 function showTab(t){tab=t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.section').forEach(s=>s.classList.toggle('hide',s.id!=='sec-'+t));renderAll();if(window.scrollTo)try{window.scrollTo(0,0);}catch(e){}}
 function renderAll(){renderHeader();if(tab==='kalender')renderCal();if(tab==='liste')renderList();if(tab==='oversigt')renderSummary();if(tab==='indstillinger')renderSettings();
-  if(tab==='backup'&&!$('#icsFrom').value){const ds=Object.values(S.shifts).map(s=>s.date).sort();if(ds.length){$('#icsFrom').value=ds[0];$('#icsTo').value=ds[ds.length-1];}}}
+  if(tab==='backup'&&!$('#icsFrom').value){const ds=Object.values(S.shifts).map(s=>s.date).sort();if(ds.length){$('#icsFrom').value=ds[0];$('#icsTo').value=ds[ds.length-1];}}
+  renderGoogleUi();}
 function shiftMonth(n){cur.m+=n;if(cur.m<1){cur.m=12;cur.y--;}if(cur.m>12){cur.m=1;cur.y++;}renderAll();}
 function init(){
   load();
@@ -1228,11 +1509,22 @@ function init(){
   $('#btnBackup').onclick=backup;
   $('#bkFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(String(r.result));r.readAsText(f);e.target.value='';};
   $('#btnClearShifts').onclick=async()=>{if(await uiConfirm('Slet alle importerede vagter? Afvigelser og dokumenter bevares.')){S.shifts={};save();renderAll();toast('Vagter slettet');}};
-  $('#btnClearAll').onclick=async()=>{if(await uiConfirm('Slet ALT i appen på denne enhed? Det kan ikke fortrydes, medmindre du har en backup.')){try{localStorage.removeItem(KEY);}catch(e){}await idbStateDel();try{await dbClear();}catch(e){}S={shifts:{},devs:{},settings:freshSettings(),meta:{}};invalidate();renderAll();toast('Alt slettet');}};
+  $('#btnClearAll').onclick=async()=>{if(await uiConfirm('Slet ALT i appen på denne enhed? Det kan ikke fortrydes, medmindre du har en backup.')){try{localStorage.removeItem(KEY);}catch(e){}await idbStateDel();try{await dbClear();}catch(e){}S={shifts:{},devs:{},settings:freshSettings(),meta:{}};googleCals=null;_gToken='';_gTokenAt=0;invalidate();renderAll();toast('Alt slettet');}};
+  $$('[data-gconnect]').forEach(b=>b.onclick=()=>connectGoogle());
+  $$('[data-gsync]').forEach(b=>b.onclick=()=>syncFromGoogle({silent:false}));
+  const gsel=$('#googleCal');if(gsel)gsel.onchange=()=>{
+    if(googleFilling)return;
+    const id=gsel.value;if(!id)return;
+    const c=(googleCals||[]).find(x=>x.id===id);
+    S.meta=S.meta||{};
+    S.meta.google=Object.assign({},S.meta.google||{},{calendarId:id,calendarSummary:(c&&c.summary)||''});
+    save();
+    syncFromGoogle({silent:false,calendarId:id});
+  };
   pwaInit();
   renderAll();
 }
-window.VagtApp={get S(){return S;},handleFile,doImport,compute,monthStats,buildIcs,monthCsv,csvToRecords,parseIcs,icsToRecords,openDay,closeDay,showTab,setMonth:(y,m)=>{cur={y,m};renderAll();},holidays,specialDays,holidayName,periodHours,ratesFor,satWindow,normFor,avg4m,shiftKind,kindStats,weekendOverview,holdFor,timeloen,roundHalf,load,save,backupObj,restore,renderAll,quickImportText,uiConfirm,loadIdb,get STORE(){return STORE;}};
+window.VagtApp={get S(){return S;},handleFile,doImport,compute,monthStats,buildIcs,monthCsv,csvToRecords,parseIcs,icsToRecords,openDay,closeDay,showTab,setMonth:(y,m)=>{cur={y,m};renderAll();},holidays,specialDays,holidayName,periodHours,ratesFor,satWindow,normFor,avg4m,shiftKind,kindStats,weekendOverview,holdFor,timeloen,roundHalf,load,save,backupObj,restore,renderAll,quickImportText,uiConfirm,loadIdb,get STORE(){return STORE;},googleEventsToIcs,googleEventsToRecords,mergeShiftRecords,googleConfigured,pickDefaultCalendar,fetchGoogleEvents,fetchGoogleCalendars,googleApiList,googleFixOpts,GOOGLE_CLIENT_ID,GOOGLE_CALENDAR_SCOPE};
 init();
 </script>
 </body>
