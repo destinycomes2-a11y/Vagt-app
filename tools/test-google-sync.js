@@ -25,9 +25,9 @@ try{
 }catch(e){console.error('script failed to evaluate',e);process.exit(1);}
 const API=context.API;
 
-assert(API.GOOGLE_CLIENT_ID==='INDSÆT_CLIENT_ID','placeholder client id is unchanged');
+assert(API.GOOGLE_CLIENT_ID==='700335373262-6dlmv7b0m7shaj3ol5vp9nm83sba86ad.apps.googleusercontent.com','public web client id is set');
 assert(API.GOOGLE_CALENDAR_SCOPE==='https://www.googleapis.com/auth/calendar.readonly','readonly calendar scope');
-assert(API.googleConfigured()===false,'placeholder does not count as configured');
+assert(API.googleConfigured()===true,'a real client id counts as configured');
 assert(!/<script[^>]+src=["']https:\/\/accounts\.google\.com/.test(html),'Google script is not a static script tag');
 assert(!/accounts\.google\.com/.test(sw),'service worker does not mention Google hosts');
 assert(!/accounts\.google\.com/.test(tmpl),'service worker template does not mention Google hosts');

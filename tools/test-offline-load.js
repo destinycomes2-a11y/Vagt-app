@@ -88,11 +88,7 @@ async function main(){
     assert((await val(`document.querySelector('#btnQuick').textContent`)).includes('Hent vagtplan fra KMD'),'file import button is still there');
     assert((await val(`document.querySelector('#googleSetupStart').textContent`)).includes('INDSÆT')===false && (await val(`document.querySelector('#googleSetupStart').textContent`)).includes('GOOGLE_CLIENT_ID'),'setup hint names the constant');
     await shot(send,'start_google_and_kmd.png');
-    await val(`document.querySelector('#btnGoogleConnectStart').click()`);
-    await sleep(100);
-    const notice=await val(`document.querySelector('#quickResult').innerText`);
-    assert(notice.includes('ikke sat op')&&notice.includes('GOOGLE_CLIENT_ID'),'clicking connect with the placeholder shows a Danish message');
-    assert((await val(`typeof google`))==='undefined','placeholder path does not load the Google script');
+    assert((await val(`document.querySelector('#googleSetupStart').classList.contains('hide')`))===true,'setup hint is hidden when the client id is set');
     const imported=await val(`(async()=>{
       const ics='BEGIN:VCALENDAR\\nBEGIN:VEVENT\\nUID:test-summer@example.com\\nCREATED:20260115T100000Z\\nDTSTART:20261026T130000Z\\nDTEND:20261026T210000Z\\nSUMMARY:Normal Tjeneste\\nEND:VEVENT\\nEND:VCALENDAR\\n';
       const file=new File([ics],'vagtplan.ics',{type:'text/calendar'});
@@ -133,8 +129,8 @@ async function main(){
     await sleep(150);
     const imp=await val(`document.querySelector('#btnGoogleConnect').textContent+'|'+(document.querySelector('#googleSetup')&&document.querySelector('#googleSetup').className)+'|'+document.querySelector('#btnGoogleSync').className`);
     assert(imp.startsWith('Forbind Google Kalender'),'import tab has the connect button');
-    assert(imp.includes('hide')&&imp.endsWith('hide')||imp.includes('btnGoogleSync')===false,'setup note stays visible and update button stays hidden until connected');
-    assert((await val(`document.querySelector('#googleSetup').innerText`)).includes('ikke sat op'),'import tab shows the Danish setup note');
+    assert((await val(`document.querySelector('#googleSetup').classList.contains('hide')`))===true,'setup note is hidden when the client id is set');
+    assert((await val(`document.querySelector('#btnGoogleSync').classList.contains('hide')`))===false,'update button is shown when a calendar is saved');
     await shot(send,'import_google_setup.png');
     const ready=await val(`(async()=>{
       if(!('serviceWorker' in navigator))return 'no-sw';
