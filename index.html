@@ -131,7 +131,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 .dot-n{background:#7a5af8}.dot-a{background:#d92d20}
 .mk-Dag{background:#fff4e5;color:#b54708}.mk-Aften{background:#eaf2ff;color:#175cd3}.mk-Nat{background:#eceff3;color:#1d2939}
-.mk-PF{background:#ecfdf3;color:#067647}.mk-Fri{background:#d1fadf;color:#067647}.mk-Ferie{background:#ccfbf1;color:#0e9384}
+.mk-PF{background:#ecfdf3;color:#067647}.mk-FO{background:#e0f2fe;color:#026aa2}.mk-Fri{background:#d1fadf;color:#067647}.mk-Ferie{background:#ccfbf1;color:#0e9384}
 #ovSwitch button.on{background:var(--infobg);color:var(--pri);font-weight:600;border-color:#b2ddff}
 .mk-Afsp{background:#fffaeb;color:#b54708}.mk-Anden{background:#f8f9fb;color:#475467}.mk-Syg{background:#fdecea;color:#b42318}.mk-Kursus{background:#f4f3ff;color:#5925dc}
 details.ok{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:#fff}
@@ -277,12 +277,13 @@ details.ok summary{cursor:pointer;font-weight:600}
 </section>
 <section class="section hide" id="sec-rul">
   <div class="card">
-    <h2>Rul-oversigt</h2>
-    <p class="small muted">Optælling pr. tjenesteplan-periode. Timer sammenlignes med ansættelsesgraden. Hvor aftalen ikke giver et entydigt antal, står der ingen målstreg – kun det, planen faktisk har.</p>
+    <h2>Rul – plan-kontrol</h2>
+    <p class="small muted">Tjek af timer og fridøgn i rullen. Tallene følger 79.01. Der er ikke opfundet satser.</p>
     <div class="grid2">
       <div><label>Rullets længde (uger)</label><input type="number" id="rulWeeks" min="1" max="52" step="1" style="width:100%"></div>
       <div><label>Rul starter (dato)</label><input type="date" id="rulStart" style="width:100%"></div>
       <div><label>Ansættelsesgrad (timer pr. uge)</label><input type="number" id="rulNorm" min="0" step="0.01" style="width:100%"></div>
+      <div><label for="rulFerie">Ferie i normen</label><select id="rulFerie" style="width:100%"><option value="">Ikke valgt</option><option value="a">Model a (7,4 t pr. feriedag, forholdsmæssigt ved deltid)</option><option value="b">Model b (timetallet ændres ikke)</option></select></div>
     </div>
     <p class="small muted">Starter datoen ikke en mandag, bruges mandagen i den uge. 79.01 § 3 stk. 2: tjenesteplan mindst 4 uger. Længden her er den, du selv sætter – aftalen fastsætter ikke et 6-ugers rul.</p>
     <div class="monthbar" style="margin-top:10px">
@@ -319,11 +320,11 @@ details.ok summary{cursor:pointer;font-weight:600}
     </details>
     <details class="ok" id="ok-arbejdsfri">
       <summary>Arbejdsfri dag (AD)</summary>
-      <p>Vejledningen til 79.01 nævner arbejdsfrie dage, stregdage og nuldage som dage, hvor søgnehelligdagsfri kan placeres. Den giver ikke et antal, man skal have. 79.01 § 9 og § 10 gælder fridøgn og søgnehelligdagsfrihed, ikke en almindelig arbejdsfri dag. <b>Ikke afklaret – spørg TR/løn</b>, hvis en AD-dag bliver inddraget.</p>
+      <p>AD er de resterende dage – der er ikke et fast antal. Vejledningen nævner arbejdsfrie dage, stregdage og nuldage som dage, hvor søgnehelligdagsfri kan placeres. 79.01 § 9 og § 10 gælder fridøgn og søgnehelligdagsfrihed, ikke en almindelig arbejdsfri dag. <b>Ikke afklaret – spørg TR/løn</b>, hvis en AD-dag bliver inddraget.</p>
     </details>
     <details class="ok" id="ok-ferie">
       <summary>Ferie</summary>
-      <p>Under ferie kan normen nedskrives med 37 timer pr. ferieuge / 7,4 timer pr. feriedag (forholdsmæssigt ved deltid), eller ferien kan indregnes med de timer, planen viser. Valget er lokalt (79.01 § 3 stk. 5). Teksterne siger ikke, hvad en vagt midt i en ferie skal honoreres med. <b>Ikke afklaret – spørg TR/løn</b>.</p>
+      <p>Model a: under ferie nedskrives timerne med 37 timer pr. ferieuge / 7,4 timer pr. feriedag. Ved deltid sættes det ned forholdsmæssigt (79.01 § 3 stk. 5). Model b: timetallet i perioden ændres ikke. Ferien indregnes i arbejdstiden med de timer, tjenesteplanen viser. Valget er lokalt. Indstillingen står under Rul. Teksterne siger ikke, hvad en vagt midt i en ferie skal honoreres med. <b>Ikke afklaret – spørg TR/løn</b>.</p>
     </details>
     <details class="ok" id="ok-bytte">
       <summary>Vagtbytte med en kollega</summary>
@@ -404,6 +405,7 @@ details.ok summary{cursor:pointer;font-weight:600}
       <div><label>Arbejdssted / afdeling</label><input id="sPlace" style="width:100%"></div>
       <div><label>Stilling</label><input id="sJob" style="width:100%"></div>
       <div><label>Ansættelsesgrad – timer pr. uge (fuldtid = 37)</label><input id="sNorm" type="number" step="0.01" min="0" style="width:100%"><span class="small muted">79.01 § 3 stk. 1. Samme tal bruges i Rul-oversigten.</span></div>
+      <div><label for="sFerieNorm">Ferie i normen</label><select id="sFerieNorm" style="width:100%"><option value="">Ikke valgt</option><option value="a">Model a (7,4 t pr. feriedag, forholdsmæssigt ved deltid)</option><option value="b">Model b (timetallet ændres ikke)</option></select><span class="small muted">79.01 § 3 stk. 5. Samme valg som under Rul.</span></div>
       <div><label>Årsløn i kr. (valgfri – kun til at vise tillæg i kr.)</label><input id="sAarsloen" inputmode="decimal" placeholder="fx fra lønsedlen" style="width:100%"><span class="small muted">Timeløn = årsløn / 1924 (79.01 § 16, s. 14). Uden årsløn vises ingen kronebeløb.</span></div>
       <div><label class="chk"><input type="checkbox" id="sNightFixed"> Jeg er fast nattevagt</label><span class="small muted">Faste nattevagter er ikke omfattet af 24. december-reglen (79.01 § 5 stk. 1).</span></div>
     </div>
@@ -573,7 +575,7 @@ const DEFAULT_SETTINGS={ver:SETTINGS_VER,name:'',place:'',job:'',norm:37,aarsloe
   weekendFixed:'ingen',hold:{},saer:{kind:'',note:''},
   lokalWeekendAfsp:true, /* LOKALAFTALE Hertughaven (oplyst lokalt, ikke set skriftligt): lørdags- og søn-/helligdagstillæg som afspadsering */
   devSigns:{'Overarbejde':1,'Afspadsering':-1,'Kursus':0,'Sygdom':-1,'Ferie':-1,'Omlagt vagt':0,'Ekstravagt':1,'Andet':0},
-  fixTZ:true,fixScope:'created',fixFrom:'',rulWeeks:6,rulStart:''};
+  fixTZ:true,fixScope:'created',fixFrom:'',rulWeeks:6,rulStart:'',ferieNorm:''};
 const freshSettings=()=>JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 let S={shifts:{},devs:{},notes:{},settings:freshSettings(),meta:{}};
 function deepMerge(a,b){for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object')deepMerge(a[k],b[k]);else a[k]=b[k];}return a;}
@@ -1112,10 +1114,10 @@ const pct=v=>String(v).replace('.',',')+' %';
 const fmtKr=v=>v.toLocaleString('da-DK',{minimumFractionDigits:2,maximumFractionDigits:2})+' kr.';
 /* ===== Hændelser, oversigt Dag/Uge/Måned, rul, advarsler =====
    Regler kun fra de vedlagte aftaletekster. Hvor teksten ikke svarer: Ikke afklaret. */
+const PLAN_TOL_H=0.5; /* timer: planen går op inden for dette spænd */
 const UNCLEAR=[
-  {id:'ad-antal',text:'Hvor mange arbejdsfri dage (AD) man burde have, står ikke i 79.01. Vejledningen nævner arbejdsfrie dage/stregdage/nuldage, men uden et antal.'},
   {id:'ad-inddrag',text:'Der er ikke en særlig betaling for at inddrage en arbejdsfri dag. § 9 og § 10 gælder fridøgn og søgnehelligdagsfrihed.'},
-  {id:'ferie-model',text:'Om ferie nedskriver normtimerne, vælges lokalt (model a eller b, 79.01 § 3 stk. 5). Appen trækker ikke ferie fra normen.'},
+  {id:'ferie-model',text:'Valget mellem feriemodel a og b er lokalt (79.01 § 3 stk. 5). Så længe indstillingen er "ikke valgt", trækkes ferie ikke fra normen.'},
   {id:'vagt-i-ferie',text:'Teksterne siger ikke, hvordan en vagt midt i en ferie skal betales.'},
   {id:'vagtbytte',text:'At et vagtbytte skal blive i samme rul, står ikke i teksterne. Bytning nævnes kun som emne til lokal dialog (79.01 forord og OK26-døgn bilag B).'},
   {id:'kroen-nu',text:'Kronebeløb står i 31/3 2000-niveau. Hvad de er i kroner i dag, står ikke i de vedlagte tekster.'},
@@ -1123,8 +1125,16 @@ const UNCLEAR=[
   {id:'pf-deltid',text:'79.01 § 4 stk. 3 siger to fridøgn pr. uge og nævner ikke, at antallet sættes ned ved deltid.'}
 ];
 let ovView='maaned',ovDate='',rulPos=null;
+function isFoShift(s){return !!(s&&/\bFO\b|søgnehelligdagsfri|soegnehelligdagsfri/i.test(s.summary||''));}
+/* Planlagt arbejde med klokkeslæt: vagter, kursus og andre opgaver (fx møde). Fravær og heldag tæller ikke som mødetid. */
+function isPlanWork(s){
+  if(!s||s.allDay)return false;
+  const cat=typeInfo(s.type).cat;
+  return cat==='work'||cat==='other';
+}
 function planBucket(s){
   if(!s)return null;
+  if(isFoShift(s))return 'FO';
   if(s.type==='ferie')return 'Ferie';
   if(s.type==='afspad')return 'Afsp';
   if(s.type==='fridogn')return 'PF';
@@ -1136,12 +1146,12 @@ function planBucket(s){
 function markName(s){const k=shiftKind(s);if(!k)return '';return k.k==='anden'?'Anden':k.label;}
 function dayMark(ds){
   const day=(compute().byDate[ds])||{shifts:[],devs:[]};
-  const works=day.shifts.filter(isWork);
+  const works=day.shifts.filter(isPlanWork);
   const kinds=[];
   for(const s of works){const n=markName(s);if(n&&!kinds.includes(n))kinds.push(n);}
   let label='';
-  if(kinds.length)label=kinds.length>1?kinds[0]+'+':kinds[0];
-  else{const order=['Ferie','Afsp','PF','Fri','Syg','Kursus'];const got=day.shifts.map(planBucket);label=order.find(x=>got.includes(x))||'';}
+  if(works.length)label=kinds.length?(kinds.length>1?kinds[0]+'+':kinds[0]):'Anden';
+  else{const order=['Ferie','Afsp','FO','PF','Fri','Syg','Kursus'];const got=day.shifts.map(planBucket);label=order.find(x=>got.includes(x))||'';}
   const note=Object.values(S.notes||{}).some(n=>n&&n.date===ds&&String(n.text||'').trim());
   return {label,note,dev:!!(day.devs&&day.devs.length),kinds};
 }
@@ -1152,6 +1162,7 @@ function dayWarnings(ds){
   const got=new Set(day.shifts.map(planBucket).filter(Boolean));
   const out=[];
   if(works.length&&got.has('PF'))out.push({level:'warn',ok:'fridoegn',text:'Både vagt og fridøgn (PF) denne dag. Inddrages fridøgnet, gælder 79.01 § 9: overarbejde, mindst 6 timer; under 14 døgns varsel desuden 452,48 kr. (31/3 2000-niveau), 470,00 kr. fra 1.4.2027. Appen kan ikke se varslet.'});
+  if(works.length&&got.has('FO'))out.push({level:'warn',ok:'soegne',text:'Både vagt og søgnehelligdagsfrihed (FO) denne dag. Inddrages friheden, gælder 79.01 § 10: overarbejde, mindst 6 timer; under 14 døgn desuden 450 kr. (31/3 2000-niveau), 460 kr. fra 1.4.2027. Appen kan ikke se varslet.'});
   if(works.length&&got.has('Fri'))out.push({level:'info',ok:'arbejdsfri',text:'Både vagt og arbejdsfri dag (AD/Fri). Teksterne har ingen særskilt sats for det. Ikke afklaret – spørg TR/løn.'});
   if(works.length&&got.has('Ferie'))out.push({level:'info',ok:'ferie',text:'Både vagt og ferie. 79.01 § 3 stk. 5 handler om timetal, ikke om betaling for vagt i ferien. Ikke afklaret – spørg TR/løn.'});
   let varsel=false;
@@ -1235,7 +1246,7 @@ function maanedHtml(){
     const ds=lDate(ms),out=new Date(ms).getUTCMonth()+1!==m,mk=dayMark(ds);
     h+=`<div class="ovcell${out?' out':''}${ds===today?' today':''}" data-ovdate="${ds}"><span class="n">${new Date(ms).getUTCDate()}</span><span class="dots">${mk.note?'<i class="dot dot-n"></i>':''}${mk.dev?'<i class="dot dot-a"></i>':''}</span>${mk.label?`<span class="lb mk-${mk.label.replace('+','')}">${esc(mk.label)}</span>`:''}</div>`;
   }
-  h+='</div><p class="small muted">Dag, Aften og Nat følger vagtens klokkeslæt (også tæt på 7:30–15:30, 15:00–23:00 og 22:45–07:45). PF er fridøgn, søgnehelligdagsfri eller PF i titlen. Fri er arbejdsfri dag, AD, stregdag eller nuldag. Lilla prik = hændelsesnote. Rød prik = afvigelse.</p>';
+  h+='</div><p class="small muted">Dag, Aften og Nat følger vagtens klokkeslæt (også tæt på 7:30–15:30, 15:00–23:00 og 22:45–07:45). En nattevagt tælles på mødedagen. PF er fridøgn. FO er søgnehelligdagsfrihed. Fri er arbejdsfri dag, AD, stregdag eller nuldag. Lilla prik = hændelsesnote. Rød prik = afvigelse.</p>';
   return h;
 }
 function renderOv(){
@@ -1255,62 +1266,105 @@ function rulSpan(index){
   return {from:lDate(a),to:lDate(a+weeks*7*D-D),weeks,index};
 }
 function rulIndexFor(ds){const weeks=Math.max(1,+S.settings.rulWeeks||6);return Math.floor((parseLD(ds)-rulAnchor())/(weeks*7*D));}
+/* Én kategori pr. kalenderdag. Nattevagt ligger kun på mødedatoen (s.date), så dagen efter ikke bliver arbejdsdag. */
+function dayRole(ds){
+  const day=compute().byDate[ds];
+  const shifts=day?day.shifts.filter(s=>s.date===ds):[];
+  if(shifts.some(isPlanWork))return 'arbejde';
+  const got=shifts.map(planBucket);
+  if(got.includes('PF'))return 'PF';
+  if(got.includes('Ferie'))return 'Ferie';
+  if(got.includes('FO'))return 'FO';
+  if(got.includes('Afsp'))return 'Afsp';
+  return 'AD';
+}
 function rulStats(p){
-  const r={dag:0,aften:0,nat:0,anden:0,hours:0,pf:0,ad:0,ferie:0,afspDays:0,covered:0,days:p.weeks*7,devs:{},afspSat:0,afspSh:0,warns:[]};
+  const weekly=normWeek();
+  const r={dag:0,aften:0,nat:0,anden:0,hours:0,arbejde:0,pf:0,ferie:0,fo:0,afsp:0,ad:0,days:p.weeks*7,devs:{},afspSat:0,afspSh:0,warns:[],shCount:0,weeksPf:[]};
   for(let d=parseLD(p.from);d<=parseLD(p.to);d+=D){
-    const ds=lDate(d),day=compute().byDate[ds];
-    if(!day||!day.shifts.length)continue;
-    r.covered++;
+    const ds=lDate(d);
+    if(isSognehelligdag(ds))r.shCount++;
+    const role=dayRole(ds);
+    if(role==='arbejde')r.arbejde++;
+    else if(role==='PF')r.pf++;
+    else if(role==='Ferie')r.ferie++;
+    else if(role==='FO')r.fo++;
+    else if(role==='Afsp')r.afsp++;
+    else r.ad++;
+    const day=compute().byDate[ds];
+    if(!day)continue;
     const seen={dag:0,aften:0,nat:0,anden:0};
     for(const s of day.shifts){
-      if(isWork(s)){r.hours+=s.hours||0;const k=shiftKind(s);if(k)seen[k.k]=1;}
-      const b=planBucket(s);
-      if(b==='PF')r.pf++;else if(b==='Fri')r.ad++;else if(b==='Ferie')r.ferie++;else if(b==='Afsp')r.afspDays++;
+      if(s.date!==ds||!isPlanWork(s))continue;
+      const k=shiftKind(s);
+      if(k)seen[k.k]=1;else seen.anden=1;
+      if(typeInfo(s.type).cat==='other')r.hours+=s.hours||0;
     }
     r.dag+=seen.dag;r.aften+=seen.aften;r.nat+=seen.nat;r.anden+=seen.anden;
+    r.hours+=(day.net||0);
+    if(S.settings.ferieNorm==='b')for(const s of day.shifts)if(s.date===ds&&planBucket(s)==='Ferie')r.hours+=s.hours||0;
     if(day.actual){const tl=dayTillaeg(day);r.afspSat+=tl.sat.pctH;r.afspSh+=tl.sh.pctH;}
     for(const v of day.devs||[])r.devs[v.type]=(r.devs[v.type]||0)+devHours(v);
     r.warns.push(...dayWarnings(ds).filter(w=>w.level==='warn').map(w=>ds+': '+w.text));
   }
-  r.norm=normFor(p.from,p.to);
+  const per=weekly?weekly/5:0;
+  let norm=weekly*p.weeks-r.shCount*per;
+  r.ferieCut=0;
+  if(S.settings.ferieNorm==='a'){r.ferieCut=r.ferie*per;norm-=r.ferieCut;}
+  r.normHours=norm;
+  r.norm={norm,shCount:r.shCount};
+  r.diff=r.hours-norm;
   r.pfTarget=2*p.weeks;
+  r.issues=[];
+  if(weekly&&Math.abs(r.diff)>PLAN_TOL_H)r.issues.push(r.diff<0?('Mangler '+fmtH(-r.diff)+' t'):(fmtH(r.diff)+' t for meget'));
+  for(let i=0;i<p.weeks;i++){
+    const start=parseLD(p.from)+i*7*D;
+    let pf=0;
+    for(let k=0;k<7;k++)if(dayRole(lDate(start+k*D))==='PF')pf++;
+    const w=isoWeek(start).w;
+    r.weeksPf.push({w,pf});
+    if(pf<2)r.issues.push((2-pf)+' fridøgn for lidt i uge '+w);
+  }
+  r.ok=!r.issues.length;
+  r.adTarget=undefined;
   return r;
 }
 function renderRul(){
-  const w=$('#rulWeeks'),st=$('#rulStart'),n=$('#rulNorm');
+  const w=$('#rulWeeks'),st=$('#rulStart'),n=$('#rulNorm'),fe=$('#rulFerie');
   if(w&&document.activeElement!==w)w.value=S.settings.rulWeeks||6;
   if(st&&document.activeElement!==st)st.value=S.settings.rulStart||'';
   if(n&&document.activeElement!==n)n.value=S.settings.norm||37;
+  if(fe&&document.activeElement!==fe)fe.value=S.settings.ferieNorm||'';
   if(rulPos==null)rulPos=rulIndexFor(todayL());
   const p=rulSpan(rulPos),s=rulStats(p);
   $('#rulTitle').textContent=fmtDate(p.from)+' – '+fmtDate(p.to)+' ('+p.weeks+' uger)';
-  const norm=s.norm?fmtH(s.norm.norm)+' t':'–';
-  const sh=s.norm&&s.norm.shCount?` Heraf er ${s.norm.shCount} søgnehelligdag${s.norm.shCount>1?'e':''} trukket fra med ${fmtH(normWeek()/5)} t pr. dag (79.01 § 3 stk. 6${S.settings.nightFixed?'':', 24/12 med, fordi du ikke er fast nattevagt, § 5 stk. 1'}).`:'';
-  let h=`<div class="kpis">
-    <div class="kpi"><b>${s.dag}</b><span>Dagvagter</span></div>
-    <div class="kpi"><b>${s.aften}</b><span>Aftenvagter</span></div>
-    <div class="kpi"><b>${s.nat}</b><span>Nattevagter</span></div>
-    <div class="kpi"><b>${s.anden}</b><span>Andre vagter</span></div>
+  const weekly=normWeek(),per=weekly/5;
+  const diffTxt=s.diff>PLAN_TOL_H?('+'+fmtH(s.diff)+' t'):s.diff<-PLAN_TOL_H?('−'+fmtH(-s.diff)+' t'):'0 t';
+  let h=s.ok?'<div class="okbox"><b>Planen går op</b> Timerne er inden for ±'+fmtH(PLAN_TOL_H)+' t af normen, og hver uge har mindst 2 fridøgn (79.01 § 4 stk. 3).</div>':'<div class="warnbox"><b>Planen går ikke op.</b> '+s.issues.map(esc).join('. ')+'.</div>';
+  h+=`<div class="kpis">
+    <div class="kpi"><b>${fmtH(s.normHours)} t</b><span>Normtimer</span></div>
     <div class="kpi"><b>${fmtH(s.hours)} t</b><span>Planlagte timer</span></div>
-    <div class="kpi"><b>${norm}</b><span>Norm (${fmtH(normWeek())} t/uge × ${p.weeks})</span></div>
-    <div class="kpi"><b>${s.pf} af ${s.pfTarget}</b><span>Fridøgn/PF (2 pr. uge, 79.01 § 4 stk. 3)</span></div>
-    <div class="kpi"><b>${s.ad}</b><span>Arbejdsfri dage (AD) – intet måltal</span></div>
-    <div class="kpi"><b>${s.ferie}</b><span>Feriedage</span></div>
-    <div class="kpi"><b>${s.afspDays}</b><span>Afspadseringsdage i planen</span></div>
+    <div class="kpi"><b>${diffTxt}</b><span>Forskel</span></div>
+    <div class="kpi"><b>${s.pf} af ${s.pfTarget}</b><span>Fridøgn (2 pr. uge, § 4 stk. 3)</span></div>
   </div>`;
-  h+=`<p class="small">Normen er ansættelsesgrad × uger, minus 7,4 timer (forholdsmæssigt) pr. søgnehelligdag. ${sh} Ferie er ikke trukket fra: det afhænger af lokal model a eller b (79.01 § 3 stk. 5). <b>Ikke afklaret – spørg TR/løn</b>, hvilken model I bruger.</p>`;
-  h+=`<p class="small">Fridøgn tælles som dage, planen har mærket fridøgn, PF, søgnehelligdagsfri eller personlig fri. Aftalen måler selve friheden i timer (55–64 eller mindst 35/32), ikke kun som en dato (79.01 § 4 stk. 3).${normWeek()&&normWeek()<37?' Ved deltid siger teksten ikke, at antallet af fridøgn bliver mindre. <b>Ikke afklaret – spørg TR/løn</b>.':''}</p>`;
-  h+=`<div class="infobox">Arbejdsfri dage (AD): planen har <b>${s.ad}</b>. Teksterne giver ikke et "burde"-antal. <b>Ikke afklaret – spørg TR/løn</b>.</div>`;
-  h+='<h3>Afspadsering i rullen</h3><ul class="small">';
-  h+=`<li>Dage i planen mærket afspadsering: ${s.afspDays}</li>`;
-  h+=`<li>Afvigelse, afspadsering: ${fmtH(s.devs['Afspadsering']||0)} t</li>`;
-  h+=`<li>Afvigelse, overarbejde: ${fmtH(s.devs['Overarbejde']||0)} t (79.01 § 11: 1:1,5 eller timeløn + 50 %)</li>`;
-  h+=`<li>Afvigelse, ekstravagt: ${fmtH(s.devs['Ekstravagt']||0)} t</li>`;
-  if(S.settings.lokalWeekendAfsp)h+=`<li>Weekendtillæg omregnet til afspadsering (lokalaftale, hjemmel 79.01 § 13 stk. 1): lørdag ${fmtH(s.afspSat)} t, søn-/helligdag ${fmtH(s.afspSh)} t</li>`;
-  h+='</ul>';
-  if(s.covered<s.days)h+=`<p class="small muted">Planen dækker ${s.covered} af ${s.days} dage i rullen. Tomme dage tælles ikke med.</p>`;
-  const top=s.warns.slice(0,8);
-  h+=top.length?'<h3>Advarsler i rullen</h3>'+top.map(t=>`<div class="warnbox">${esc(t)}</div>`).join(''):'<div class="okbox">Ingen advarsler i de dage, planen dækker.</div>';
+  h+=`<p class="small">Normtimer = ${fmtH(weekly)} t/uge × ${p.weeks} uger${s.shCount?` − ${s.shCount} søgnehelligdag${s.shCount>1?'e':''} × ${fmtH(per)} t (${fmtH(weekly)} ÷ 5, 79.01 § 3 stk. 6)`:''}${s.ferieCut?` − ${s.ferie} feriedag${s.ferie>1?'e':''} × ${fmtH(per)} t (model a, § 3 stk. 5)`:''}. Ved 37 t er det 7,4 t pr. søgnehelligdag, ved 30 t er det 6 t.${S.settings.nightFixed?'':' 24. december tæller med, når du ikke er fast nattevagt (§ 5 stk. 1).'}</p>`;
+  h+=`<p class="small">Planlagte timer er vagter, kurser og andre opgaver med klokkeslæt, plus registrerede afvigelser. En nattevagt tælles kun på mødedagen (${s.nat} nattevagt${s.nat===1?'':'er'} i rullen). Pauser under ½ time, hvor du står til rådighed og ikke kan forlade stedet, tæller med i arbejdstiden. Andre pauser gør ikke (79.01 § 4 stk. 7). Appen bruger vagternes længde, som de står i planen.</p>`;
+  if(!S.settings.ferieNorm)h+=`<div class="infobox">Ferie i normen: <b>ikke valgt</b>. Feriedage trækkes ikke fra. Model a nedskriver med 7,4 t pr. feriedag (forholdsmæssigt ved deltid). Model b ændrer ikke timetallet; ferien indregnes med de timer, planen viser (79.01 § 3 stk. 5).</div>`;
+  else if(S.settings.ferieNorm==='b')h+=`<p class="small">Model b: timetallet ændres ikke under ferie. Ferien indregnes kun med de timer, tjenesteplanen selv viser (79.01 § 3 stk. 5).</p>`;
+  h+=`<h3>Dage i rullen</h3><div class="kpis">
+    <div class="kpi"><b>${s.arbejde}</b><span>Arbejdsdage</span></div>
+    <div class="kpi"><b>${s.pf}</b><span>Fridøgn/PF</span></div>
+    <div class="kpi"><b>${s.ferie}</b><span>Ferie</span></div>
+    <div class="kpi"><b>${s.fo}</b><span>FO</span></div>
+    <div class="kpi"><b>${s.afsp}</b><span>Afspadsering</span></div>
+    <div class="kpi"><b>${s.ad}</b><span>AD</span></div>
+  </div>`;
+  h+=`<p class="small">AD er de resterende dage – der er ikke et fast antal. Dag ${s.dag} · aften ${s.aften} · nat ${s.nat} · anden vagt ${s.anden}.</p>`;
+  if(s.afsp||s.devs['Afspadsering']||s.devs['Overarbejde'])h+=`<p class="small">Afspadsering i planen: ${s.afsp} dage. Afvigelser: afspadsering ${fmtH(s.devs['Afspadsering']||0)} t, overarbejde ${fmtH(s.devs['Overarbejde']||0)} t${S.settings.lokalWeekendAfsp?`, weekendtillæg omregnet ${fmtH(s.afspSat+s.afspSh)} t (79.01 § 13 stk. 1)`:''}.</p>`;
+  h+=`<p class="small muted">Ferie, FO og afspadsering håndteres for sig. Det er lederen, der fastlægger tjenesteplanen og har ansvaret for, at timerne går op ved normperiodens afslutning (79.01 § 3 stk. 4; vejledningen: den endelige fastlæggelse er lederens beslutning).</p>`;
+  if(normWeek()&&normWeek()<37)h+=`<p class="small">79.01 § 4 stk. 3 siger to fridøgn pr. uge og nævner ikke, at antallet sættes ned ved deltid. <b>Ikke afklaret – spørg TR/løn</b>.</p>`;
+  const top=s.warns.slice(0,6);
+  if(top.length)h+='<h3>Advarsler</h3>'+top.map(t=>`<div class="warnbox">${esc(t)}</div>`).join('');
   $('#rulBody').innerHTML=h;
 }
 function renderUklar(){const el=$('#uklarListe');if(!el)return;el.innerHTML=UNCLEAR.map(u=>`<p class="small"><b>Ikke afklaret – spørg TR/løn.</b> ${esc(u.text)}</p>`).join('');}
@@ -1386,7 +1440,7 @@ function saveHertug(){
 }
 function renderSettings(){
   const st=S.settings;
-  $('#sName').value=st.name||'';$('#sPlace').value=st.place||'';$('#sJob').value=st.job||'';$('#sNorm').value=st.norm||'';$('#sAarsloen').value=st.aarsloen||'';$('#sNightFixed').checked=!!st.nightFixed;$('#sSatMode').value=st.satMode||'aftale';$('#sJulFrom').value=st.julFrom||'07:00';$('#sJulOk').checked=!!st.julOk;$('#sLokWeekend').checked=!!st.lokalWeekendAfsp;$('#julPh').classList.toggle('hide',!!st.julOk);$('#julOkPill').classList.toggle('hide',!st.julOk);renderHertug();
+  $('#sName').value=st.name||'';$('#sPlace').value=st.place||'';$('#sJob').value=st.job||'';$('#sNorm').value=st.norm||'';if($('#sFerieNorm'))$('#sFerieNorm').value=st.ferieNorm||'';$('#sAarsloen').value=st.aarsloen||'';$('#sNightFixed').checked=!!st.nightFixed;$('#sSatMode').value=st.satMode||'aftale';$('#sJulFrom').value=st.julFrom||'07:00';$('#sJulOk').checked=!!st.julOk;$('#sLokWeekend').checked=!!st.lokalWeekendAfsp;$('#julPh').classList.toggle('hide',!!st.julOk);$('#julOkPill').classList.toggle('hide',!st.julOk);renderHertug();
   $('#sWaiver').checked=!!st.waiver.on;$('#sWaiverDate').value=st.waiver.date||'';$('#sWaiverTo').value=st.waiver.to||'';$('#sWaiverNote').value=st.waiver.note||'';
   $('#sEveFrom').value=st.eveFrom;$('#sEveTo').value=st.eveTo;$('#sNightFrom').value=st.nightFrom;$('#sNightTo').value=st.nightTo;$('#sSatFrom').value=st.satFrom;$('#sSatTo').value=st.satTo;
   $('#sRest').value=st.rest;$('#sWeekMax').value=st.weekMax;$('#sMinWin').value=st.minWin;
@@ -1397,7 +1451,7 @@ function renderSettings(){
 }
 function saveSettings(){
   const st=S.settings;
-  Object.assign(st,{name:$('#sName').value.trim(),place:$('#sPlace').value.trim(),job:$('#sJob').value.trim(),norm:$('#sNorm').value,
+  Object.assign(st,{name:$('#sName').value.trim(),place:$('#sPlace').value.trim(),job:$('#sJob').value.trim(),norm:$('#sNorm').value,ferieNorm:($('#sFerieNorm')&&$('#sFerieNorm').value)||'',
     eveFrom:$('#sEveFrom').value||'17:00',eveTo:$('#sEveTo').value||'23:00',nightFrom:$('#sNightFrom').value||'23:00',nightTo:$('#sNightTo').value||'06:00',satMode:$('#sSatMode').value||'aftale',satFrom:$('#sSatFrom').value||'06:00',satTo:$('#sSatTo').value||'00:00',aarsloen:$('#sAarsloen').value.trim(),nightFixed:$('#sNightFixed').checked,julFrom:$('#sJulFrom').value||'07:00',julOk:$('#sJulOk').checked,lokalWeekendAfsp:$('#sLokWeekend').checked,
     rest:+$('#sRest').value||11,weekMax:+$('#sWeekMax').value||48,minWin:$('#sMinWin').value===''?2:+$('#sMinWin').value});
   st.waiver={on:$('#sWaiver').checked,date:$('#sWaiverDate').value,to:$('#sWaiverTo').value,note:$('#sWaiverNote').value};
@@ -1876,7 +1930,8 @@ function init(){
   $('#hnShare').onclick=async()=>{const text=notesText(hnListNow());try{if(navigator.share){await navigator.share({title:'Hændelsesnoter',text});$('#hnMsg').textContent='Delt.';return;}}catch(e){if(e&&e.name==='AbortError')return;}$('#hnMsg').textContent='Deling er ikke mulig her. Brug kopiér eller hent fil.';};
   $('#hnTxt').onclick=()=>dl(new Blob([notesText(hnListNow())],{type:'text/plain;charset=utf-8'}),'haendelser.txt');
   $('#hnCsv').onclick=()=>dl(new Blob([notesCsv(hnListNow())],{type:'text/csv;charset=utf-8'}),'haendelser.csv');
-  const saveRulFields=()=>{S.settings.rulWeeks=Math.max(1,+$('#rulWeeks').value||6);S.settings.rulStart=$('#rulStart').value||'';if($('#rulNorm').value!=='')S.settings.norm=$('#rulNorm').value;rulPos=null;save();renderRul();};
+  const saveRulFields=()=>{S.settings.rulWeeks=Math.max(1,+$('#rulWeeks').value||6);S.settings.rulStart=$('#rulStart').value||'';if($('#rulNorm').value!=='')S.settings.norm=$('#rulNorm').value;S.settings.ferieNorm=($('#rulFerie')&&$('#rulFerie').value)||'';rulPos=null;save();renderRul();};
+  if($('#rulFerie'))$('#rulFerie').onchange=saveRulFields;
   $('#rulWeeks').onchange=saveRulFields;$('#rulStart').onchange=saveRulFields;$('#rulNorm').onchange=saveRulFields;
   $('#rulPrev').onclick=()=>{if(rulPos==null)rulPos=rulIndexFor(todayL());rulPos--;renderRul();};
   $('#rulNext').onclick=()=>{if(rulPos==null)rulPos=rulIndexFor(todayL());rulPos++;renderRul();};

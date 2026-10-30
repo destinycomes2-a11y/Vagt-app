@@ -99,8 +99,9 @@ async function main(){
     await val(`VagtApp.showTab('rul')`);
     await sleep(150);
     const rul=await val(`document.querySelector('#sec-rul').innerText`);
-    assert(rul.includes('12')&&rul.includes('79.01 § 4')&&rul.includes('Ikke afklaret'),'rul shows 2 fridøgn per week and the unclear AD note');
-    await shot('rul_oversigt.png');
+    assert(rul.includes('§ 4 stk. 3')&&rul.includes('AD er de resterende dage')&&rul.includes('der er ikke et fast antal')&&!rul.includes('burde'),'rul is a plan-kontrol without an AD target');
+    assert(rul.includes('Planen går')&&rul.includes('§ 4 stk. 7'),'conclusion and pause note are shown');
+    await shot('rul_plan_kontrol.png');
     await val(`VagtApp.showTab('haendelser')`);
     await sleep(100);
     const hn=await val(`document.querySelector('#sec-haendelser').innerText`);
