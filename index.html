@@ -120,6 +120,28 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill-lok{display:inline-block;background:#e0eaff;color:#2d31a6;border:1px solid #a4bcfd;border-radius:999px;padding:0 7px;font-size:11px;font-weight:600;white-space:nowrap}
 .pill-warn{display:inline-block;background:#fef0c7;color:#93370d;border:1px solid #fec84b;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
 #tillaeg td,#tillaeg th{white-space:nowrap}
+.ovgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.ovgrid .hd{font-size:11px;color:var(--mut);text-align:center}
+.ovcell{min-height:52px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:3px;cursor:pointer;position:relative;text-align:center}
+.ovcell.out{opacity:.4}
+.ovcell.today{outline:2px solid var(--pri2)}
+.ovcell .n{font-size:11px;font-weight:600;display:block}
+.lb{display:inline-block;margin-top:2px;font-size:11px;font-weight:700;border-radius:4px;padding:0 4px}
+.ovcell .dots{position:absolute;top:3px;right:3px;display:flex;gap:2px}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dot-n{background:#7a5af8}.dot-a{background:#d92d20}
+.mk-Dag{background:#fff4e5;color:#b54708}.mk-Aften{background:#eaf2ff;color:#175cd3}.mk-Nat{background:#eceff3;color:#1d2939}
+.mk-PF{background:#ecfdf3;color:#067647}.mk-Fri{background:#d1fadf;color:#067647}.mk-Ferie{background:#ccfbf1;color:#0e9384}
+#ovSwitch button.on{background:var(--infobg);color:var(--pri);font-weight:600;border-color:#b2ddff}
+.mk-Afsp{background:#fffaeb;color:#b54708}.mk-Anden{background:#f8f9fb;color:#475467}.mk-Syg{background:#fdecea;color:#b42318}.mk-Kursus{background:#f4f3ff;color:#5925dc}
+details.ok{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:#fff}
+details.ok summary{cursor:pointer;font-weight:600}
+.uge-line{display:flex;gap:8px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.uge-line b{width:92px;flex:none}
+@media (max-width:640px){
+  .ovcell{min-height:44px;padding:2px}
+  .ovcell .lb{font-size:10px;padding:0 2px}
+}
 </style>
 </head>
 <body>
@@ -133,6 +155,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <button data-tab="kalender" class="on">Kalender</button>
   <button data-tab="liste">Liste</button>
   <button data-tab="oversigt">Oversigt</button>
+  <button data-tab="haendelser">Hændelser</button>
+  <button data-tab="rul">Rul</button>
+  <button data-tab="overenskomst">Overenskomst</button>
   <button data-tab="import">Import</button>
   <button data-tab="indstillinger">Indstillinger</button>
   <button data-tab="backup">Eksport &amp; backup</button>
@@ -195,6 +220,12 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <button class="mnext noprint">›</button>
     </div>
     <div id="printHead" class="small muted"></div>
+    <div class="row noprint" id="ovSwitch" style="margin-bottom:8px">
+      <button type="button" class="small" data-ov="dag">Dag</button>
+      <button type="button" class="small" data-ov="uge">Uge</button>
+      <button type="button" class="small" data-ov="maaned">Måned</button>
+    </div>
+    <div id="ovTop"></div>
     <div class="warnbox"><b>Vejledende beregning.</b> Tallene er kun en hjælp. Satser og tidsrum er taget fra arbejdstidsaftalen for døgnområdet (79.01, OK24 med OK26-ændringer – se aftaler/regler.md). Lønsedlen og evt. lokalaftaler er det, der gælder.</div>
     <div id="holdSum" style="margin-top:10px"></div>
     <div class="kpis" id="kpis" style="margin-top:10px"></div>
@@ -218,6 +249,102 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <button class="pri" id="btnCsvMonth">Hent månedsoversigt (CSV)</button>
       <button id="btnPrint">Udskriv / gem som PDF</button>
     </div>
+  </div>
+</section>
+<section class="section hide" id="sec-haendelser">
+  <div class="card">
+    <h2>Hændelser</h2>
+    <p class="small muted">Noter til TR og arbejdsmiljø, fx vold eller trussel. Skriv ikke navne eller CPR-numre. Dato og vagt følger med automatisk. Noterne gemmes kun på denne enhed.</p>
+    <div class="grid2">
+      <div><label>Fra dato</label><input type="date" id="hnFrom" style="width:100%"></div>
+      <div><label>Til dato</label><input type="date" id="hnTo" style="width:100%"></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button type="button" class="small" id="hnMonth">Seneste måned</button>
+      <button type="button" class="small" id="hnQuarter">Seneste kvartal</button>
+      <button type="button" class="small" id="hnYear">Seneste år</button>
+      <button type="button" class="small" id="hnAll">Hele perioden</button>
+    </div>
+    <div id="hnList" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:10px">
+      <button type="button" class="pri" id="hnCopy">Kopiér som tekst</button>
+      <button type="button" id="hnShare">Del</button>
+      <button type="button" id="hnTxt">Hent .txt</button>
+      <button type="button" id="hnCsv">Hent .csv</button>
+    </div>
+    <p class="small muted" id="hnMsg"></p>
+  </div>
+</section>
+<section class="section hide" id="sec-rul">
+  <div class="card">
+    <h2>Rul-oversigt</h2>
+    <p class="small muted">Optælling pr. tjenesteplan-periode. Timer sammenlignes med ansættelsesgraden. Hvor aftalen ikke giver et entydigt antal, står der ingen målstreg – kun det, planen faktisk har.</p>
+    <div class="grid2">
+      <div><label>Rullets længde (uger)</label><input type="number" id="rulWeeks" min="1" max="52" step="1" style="width:100%"></div>
+      <div><label>Rul starter (dato)</label><input type="date" id="rulStart" style="width:100%"></div>
+      <div><label>Ansættelsesgrad (timer pr. uge)</label><input type="number" id="rulNorm" min="0" step="0.01" style="width:100%"></div>
+    </div>
+    <p class="small muted">Starter datoen ikke en mandag, bruges mandagen i den uge. 79.01 § 3 stk. 2: tjenesteplan mindst 4 uger. Længden her er den, du selv sætter – aftalen fastsætter ikke et 6-ugers rul.</p>
+    <div class="monthbar" style="margin-top:10px">
+      <button type="button" id="rulPrev" aria-label="Forrige rul">‹</button>
+      <h2 id="rulTitle" style="font-size:16px"></h2>
+      <button type="button" id="rulNext" aria-label="Næste rul">›</button>
+    </div>
+    <div id="rulBody"></div>
+  </div>
+</section>
+<section class="section hide" id="sec-overenskomst">
+  <div class="card">
+    <h2>Overenskomst</h2>
+    <p class="small muted">Kort forklaring ud fra de vedlagte tekster: 73.01 (OK24), 79.01 (OK24) og OK26-forliget om døgnarbejdstid, plus 79.02 og den nye 64.12a. Kronebeløb står, som teksten skriver dem (31/3 2000-niveau). Nutidskroner står ikke i teksterne.</p>
+    <details class="ok" id="ok-tjeneste" open>
+      <summary>Tjenesteplan og varsling af ændring</summary>
+      <p>Planen skal vare mindst 4 uger, drøftes og udleveres senest 4 uger før, medmindre andet aftales lokalt (79.01 § 3 stk. 2 og 3). En ændring af den planlagte tjenestes placering kan kun ske efter drøftelse og kun i ganske særlige tilfælde. Orientering skal ske i arbejdstiden (79.01 § 6). 73.01 § 14 siger, at 79.01 gælder.</p>
+    </details>
+    <details class="ok" id="ok-omlaegning">
+      <summary>Omlægning med kort varsel</summary>
+      <p>Omlægning skal varsles mindst 4 døgn. Er varslet kortere, betales 30,85 kr. pr. omlagt time (påbegyndt halve time) for normaltjeneste og 15,43 kr. for rådighedstjeneste. Beløbene er 31/3 2000-niveau (79.01 § 7). Overarbejde er ikke omlagt tjeneste. Teksten kalder det ikke "varselstillæg".</p>
+    </details>
+    <details class="ok" id="ok-overarbejde">
+      <summary>Overarbejde og merarbejde</summary>
+      <p>Fuldtid, OK24: overarbejde er tjeneste ud over 37 timer i gennemsnit i opgørelsesperioden eller ud over den daglige norm. Det varsles senest dagen før i arbejdstiden. Mangler varslet for overarbejde over 1 time, betales 37,91 kr. pr. gang (31/3 2000-niveau). Opgøres i påbegyndte halve timer og afspadseres 1:1,5 eller betales med timeløn + 50 % (79.01 § 11). Deltid indtil 31.3.2026: merarbejde op til fuldtid afspadseres 1:1 eller betales med timeløn (79.01 § 12). Fra 1.4.2026 honoreres deltids merarbejde som overarbejde, og § 12 udgår (OK26-døgn pkt. 9 og bilag D). Afspadsering skal som udgangspunkt være afviklet inden udgangen af den 3. måned, ellers udbetales den.</p>
+    </details>
+    <details class="ok" id="ok-fridoegn">
+      <summary>Fridøgn (PF) og indkaldelse</summary>
+      <p>Der gives to fridøgn pr. uge. Samlet skal de udgøre 55–64 timer, eller to korte perioder på mindst 35 timer (32 timer, hvis hviletiden lokalt er nedsat til 8 timer) (79.01 § 4 stk. 3). Inddrages et fridøgn med under 4 ugers varsel, er det overarbejde, dog mindst 6 timer, og friheden skal erstattes inden udgangen af den 3. følgende måned (79.01 § 9 stk. 1). Under 14 døgns varsel betales desuden 452,48 kr. pr. gang (31/3 2000-niveau), fra 1.4.2027 470,00 kr. (79.01 § 9 stk. 2 og OK26-døgn pkt. 4). Det gælder ikke overarbejde i forlængelse af planlagt tjeneste, hvis fridøgnets mindstelængde holdes (§ 9 stk. 3).</p>
+    </details>
+    <details class="ok" id="ok-soegne">
+      <summary>Søgnehelligdagsfrihed</summary>
+      <p>En søgnehelligdag nedskriver de timer, der kan planlægges, med 7,4 timer (forholdsmæssigt ved deltid) (79.01 § 3 stk. 6). Friheden skal vare mindst 35 timer (32 timer ved 8 timers hvile) (79.01 § 4 stk. 4). Inddrages den med under 4 ugers varsel, er det overarbejde, mindst 6 timer (79.01 § 10 stk. 1). Under 14 døgn: desuden 450 kr. pr. gang (31/3 2000-niveau), fra 1.4.2027 460 kr. (OK26-døgn pkt. 5).</p>
+    </details>
+    <details class="ok" id="ok-arbejdsfri">
+      <summary>Arbejdsfri dag (AD)</summary>
+      <p>Vejledningen til 79.01 nævner arbejdsfrie dage, stregdage og nuldage som dage, hvor søgnehelligdagsfri kan placeres. Den giver ikke et antal, man skal have. 79.01 § 9 og § 10 gælder fridøgn og søgnehelligdagsfrihed, ikke en almindelig arbejdsfri dag. <b>Ikke afklaret – spørg TR/løn</b>, hvis en AD-dag bliver inddraget.</p>
+    </details>
+    <details class="ok" id="ok-ferie">
+      <summary>Ferie</summary>
+      <p>Under ferie kan normen nedskrives med 37 timer pr. ferieuge / 7,4 timer pr. feriedag (forholdsmæssigt ved deltid), eller ferien kan indregnes med de timer, planen viser. Valget er lokalt (79.01 § 3 stk. 5). Teksterne siger ikke, hvad en vagt midt i en ferie skal honoreres med. <b>Ikke afklaret – spørg TR/løn</b>.</p>
+    </details>
+    <details class="ok" id="ok-bytte">
+      <summary>Vagtbytte med en kollega</summary>
+      <p>79.01's forord nævner "indbyrdes bytning af vagter" som noget, man kan drøfte lokalt. OK26-døgn bilag B nævner "dialog om mulighed for at bytte vagter" i et projekt. Ingen af teksterne siger, at byttet skal blive inden for samme rul eller normperiode. <b>Ikke afklaret – spørg TR/løn</b>.</p>
+    </details>
+    <details class="ok" id="ok-hviletid">
+      <summary>Hviletid og 11-timers reglen</summary>
+      <p>79.01 § 15 henviser til aftalen om hviletid. 79.02 § 2: hviletiden mellem to døgns normaltjenester kan nedsættes til 8 timer ved skriftlig aftale mellem ledelsen og TR, højst 2 gange om ugen og ikke to døgn i træk. Fra 1.4.2026 gælder 64.12a med samme grænser (§ 5), og hviletiden kan også udskydes (OK26-døgn). Kan 11 timer (evt. 8) ikke holdes efter overarbejde eller tilkald, gives tjenestefri med løn, indtil der er 8 timers hvile (79.01 § 11, bemærkning). Appen bruger din registrering af, om du har sagt ja til fravigelsen.</p>
+    </details>
+    <details class="ok" id="ok-tillaeg">
+      <summary>Aften, nat, weekend og helligdag</summary>
+      <p>Fra 1.1.2026, i procent af timelønnen, for effektiv tjeneste, pr. påbegyndt halve time (79.01 § 13): aften 17–23 er 36 %, nat 23–06 er 40 %, lørdag 06–24 er 32 %, søn- og helligdage 00–24 er 50 %. Tillæggene lægges sammen. Aften og nat udbetales, medmindre andet aftales lokalt. De kan også afspadseres. Afspadsering skal som udgangspunkt være afviklet inden udgangen af den 3. måned, ellers udbetales tillægget (§ 13 stk. 3). 1. maj, Grundlovsdag og 31. december kl. 12–24 honoreres som søndag i hele landet undtagen FKKA, København og Frederiksberg (79.01 § 5 stk. 2). 24. december er søgnehelligdag fra dagstjenestens begyndelse, ikke for faste nattevagter (§ 5 stk. 1).</p>
+    </details>
+    <details class="ok" id="ok-afspad">
+      <summary>Afspadsering, der ikke står i planen</summary>
+      <p>Afspadsering ud over planen skal varsles mindst 4 døgn. Afspadsering, der skal sikre arbejdsmiljøreglerne, kræver ingen varsling. Aflyses planlagt afspadsering med under 4 døgns varsel, før den er begyndt, honoreres tjenesten som overarbejde (79.01 § 8).</p>
+    </details>
+    <details class="ok" id="ok-uklart">
+      <summary>Ikke afklaret i teksterne</summary>
+      <div id="uklarListe"></div>
+    </details>
   </div>
 </section>
 <section class="section hide" id="sec-import">
@@ -276,7 +403,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div><label>Navn</label><input id="sName" style="width:100%"></div>
       <div><label>Arbejdssted / afdeling</label><input id="sPlace" style="width:100%"></div>
       <div><label>Stilling</label><input id="sJob" style="width:100%"></div>
-      <div><label>Ugentlig normtid (timer) – fuldtid = 37</label><input id="sNorm" type="number" step="0.01" min="0" style="width:100%"></div>
+      <div><label>Ansættelsesgrad – timer pr. uge (fuldtid = 37)</label><input id="sNorm" type="number" step="0.01" min="0" style="width:100%"><span class="small muted">79.01 § 3 stk. 1. Samme tal bruges i Rul-oversigten.</span></div>
       <div><label>Årsløn i kr. (valgfri – kun til at vise tillæg i kr.)</label><input id="sAarsloen" inputmode="decimal" placeholder="fx fra lønsedlen" style="width:100%"><span class="small muted">Timeløn = årsløn / 1924 (79.01 § 16, s. 14). Uden årsløn vises ingen kronebeløb.</span></div>
       <div><label class="chk"><input type="checkbox" id="sNightFixed"> Jeg er fast nattevagt</label><span class="small muted">Faste nattevagter er ikke omfattet af 24. december-reglen (79.01 § 5 stk. 1).</span></div>
     </div>
@@ -365,7 +492,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   </div>
   <div class="card">
     <h2>Backup</h2>
-    <p class="small muted">Alt ligger kun i denne browser. Gem en backup jævnligt (fx i OneDrive), og brug den til at flytte data til en ny telefon.</p>
+    <p class="small muted">Alt ligger kun i denne browser, også hændelsesnoter. Gem en backup jævnligt (fx i OneDrive), og brug den til at flytte data til en ny telefon.</p>
     <label class="chk"><input type="checkbox" id="bkDocs" checked> Medtag vedhæftede dokumenter (gør filen større)</label>
     <div class="row" style="margin-top:8px">
       <button class="pri" id="btnBackup">Hent backup (.json)</button>
@@ -446,14 +573,14 @@ const DEFAULT_SETTINGS={ver:SETTINGS_VER,name:'',place:'',job:'',norm:37,aarsloe
   weekendFixed:'ingen',hold:{},saer:{kind:'',note:''},
   lokalWeekendAfsp:true, /* LOKALAFTALE Hertughaven (oplyst lokalt, ikke set skriftligt): lørdags- og søn-/helligdagstillæg som afspadsering */
   devSigns:{'Overarbejde':1,'Afspadsering':-1,'Kursus':0,'Sygdom':-1,'Ferie':-1,'Omlagt vagt':0,'Ekstravagt':1,'Andet':0},
-  fixTZ:true,fixScope:'created',fixFrom:''};
+  fixTZ:true,fixScope:'created',fixFrom:'',rulWeeks:6,rulStart:''};
 const freshSettings=()=>JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-let S={shifts:{},devs:{},settings:freshSettings(),meta:{}};
+let S={shifts:{},devs:{},notes:{},settings:freshSettings(),meta:{}};
 function deepMerge(a,b){for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object')deepMerge(a[k],b[k]);else a[k]=b[k];}return a;}
 /* Lagring: localStorage (hurtig) + spejl i IndexedDB (robust). Åbnes filen som content:// eller i en mail-forhåndsvisning kan localStorage mangle/være midlertidig. */
 let STORE={ls:false,idb:false,persist:null,err:''};
 function lsOk(){try{const k='__vt_probe';localStorage.setItem(k,'1');const ok=localStorage.getItem(k)==='1';localStorage.removeItem(k);return ok;}catch(e){STORE.err=e.name||String(e);return false;}}
-function applyState(r){S.shifts=r.shifts||{};S.devs=r.devs||{};S.meta=r.meta||{};S.settings=deepMerge(freshSettings(),r.settings||{});migrate(r.settings||{});invalidate();}
+function applyState(r){S.shifts=r.shifts||{};S.devs=r.devs||{};S.notes=r.notes||{};S.meta=r.meta||{};S.settings=deepMerge(freshSettings(),r.settings||{});migrate(r.settings||{});invalidate();}
 function load(){STORE.ls=lsOk();try{const r=STORE.ls?JSON.parse(localStorage.getItem(KEY)||'null'):null;if(r)applyState(r);}catch(e){console.error(e);}}
 function stDb(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('ingen IndexedDB'));let q;try{q=indexedDB.open('vagtapp-state',1);}catch(e){return rej(e);}q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbStateGet(){const db=await stDb();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(KEY);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error);});}
@@ -487,8 +614,8 @@ const TYPES=[
   {k:'afspad',re:/afspad/i,label:'Afspadsering',color:'#eaaa08',cat:'absence'},
   {k:'ferie',re:/ferie/i,label:'Ferie',color:'#0e9384',cat:'absence'},
   {k:'syg',re:/syg/i,label:'Sygdom',color:'#d92d20',cat:'absence'},
-  {k:'fridogn',re:/fridøgn|fridogn|fri døgn/i,label:'Fridøgn',color:'#12b76a',cat:'free'},
-  {k:'arbfri',re:/arbejdsfri|fridag|^fri$/i,label:'Arbejdsfri',color:'#75e0a7',cat:'free'},
+  {k:'fridogn',re:/fridøgn|fridogn|fri døgn|\bpf\b|søgnehelligdagsfri|soegnehelligdagsfri|personlig fri|beskyttet fri/i,label:'Fridøgn',color:'#12b76a',cat:'free'},
+  {k:'arbfri',re:/arbejdsfri|fridag|^fri$|\bad\b|stregdag|nuldag/i,label:'Arbejdsfri',color:'#75e0a7',cat:'free'},
   {k:'andet',re:/.*/,label:'Andet',color:'#98a2b3',cat:'other'}];
 const typeOf=summary=>TYPES.find(t=>t.re.test(summary||''))||TYPES[TYPES.length-1];
 const typeInfo=k=>TYPES.find(t=>t.k===k)||TYPES[TYPES.length-1];
@@ -685,9 +812,12 @@ function mergeShiftRecords(records, replace){
   const now=new Date().toISOString();
   for(const r of records){
     const prev=S.shifts[r.id];
-    if(prev){updated++;if(shiftContentKey(prev)!==shiftContentKey(r))changed++;}
+    let firstAt=now,changedAt='';
+    if(prev){updated++;firstAt=prev.firstImportedAt||prev.importedAt||now;if(shiftContentKey(prev)!==shiftContentKey(r)){changed++;changedAt=now;}else changedAt=prev.planChangedAt||'';}
     else added++;
-    S.shifts[r.id]=Object.assign({},r,{importedAt:now});
+    const stored=Object.assign({},r,{importedAt:now,firstImportedAt:firstAt});
+    if(changedAt)stored.planChangedAt=changedAt;
+    S.shifts[r.id]=stored;
   }
   return {added,updated,changed,removed,at:now};
 }
@@ -876,8 +1006,14 @@ const patterns=()=>(S.settings.shiftPatterns&&S.settings.shiftPatterns.length?S.
 function shiftKind(s){
   if(!s||s.allDay||s.part||!KIND_TYPES.includes(s.type))return null;
   const a=lTime(parseLIso(s.start)),b=lTime(parseLIso(s.end));
-  const p=patterns().find(p=>p.from===a&&p.to===b);
-  return p?{k:p.k,label:p.label}:{k:'anden',label:'Anden vagt'};
+  const exact=patterns().find(p=>p.from===a&&p.to===b);
+  if(exact)return {k:exact.k,label:exact.label,how:'praecis'};
+  const sm=hm2min(a),em=hm2min(b);if(sm==null||em==null)return {k:'anden',label:'Anden vagt',how:'anden'};
+  const overnight=String(s.end||'').slice(0,10)>s.date||em<=sm;
+  if(overnight&&sm>=21*60&&em>=6*60&&em<=9*60+30)return {k:'nat',label:'Nat',how:'tid'};
+  if(!overnight&&sm>=13*60+30&&sm<=17*60&&em>=21*60&&em<=24*60)return {k:'aften',label:'Aften',how:'tid'};
+  if(!overnight&&sm>=6*60&&sm<=9*60+30&&em>=14*60&&em<=17*60)return {k:'dag',label:'Dag',how:'tid'};
+  return {k:'anden',label:'Anden vagt',how:'anden'};
 }
 const kindBadge=(kd,short)=>kd?`<span class="vt vt-${kd.k}" title="${esc(kd.label)}">${short?KIND_SHORT[kd.k]||'?':esc(kd.label)}</span>`:'';
 function kindStats(){const r={dag:0,aften:0,nat:0,anden:0,total:0,andenTimes:{}};
@@ -974,7 +1110,212 @@ function renderList(){
 }
 const pct=v=>String(v).replace('.',',')+' %';
 const fmtKr=v=>v.toLocaleString('da-DK',{minimumFractionDigits:2,maximumFractionDigits:2})+' kr.';
+/* ===== Hændelser, oversigt Dag/Uge/Måned, rul, advarsler =====
+   Regler kun fra de vedlagte aftaletekster. Hvor teksten ikke svarer: Ikke afklaret. */
+const UNCLEAR=[
+  {id:'ad-antal',text:'Hvor mange arbejdsfri dage (AD) man burde have, står ikke i 79.01. Vejledningen nævner arbejdsfrie dage/stregdage/nuldage, men uden et antal.'},
+  {id:'ad-inddrag',text:'Der er ikke en særlig betaling for at inddrage en arbejdsfri dag. § 9 og § 10 gælder fridøgn og søgnehelligdagsfrihed.'},
+  {id:'ferie-model',text:'Om ferie nedskriver normtimerne, vælges lokalt (model a eller b, 79.01 § 3 stk. 5). Appen trækker ikke ferie fra normen.'},
+  {id:'vagt-i-ferie',text:'Teksterne siger ikke, hvordan en vagt midt i en ferie skal betales.'},
+  {id:'vagtbytte',text:'At et vagtbytte skal blive i samme rul, står ikke i teksterne. Bytning nævnes kun som emne til lokal dialog (79.01 forord og OK26-døgn bilag B).'},
+  {id:'kroen-nu',text:'Kronebeløb står i 31/3 2000-niveau. Hvad de er i kroner i dag, står ikke i de vedlagte tekster.'},
+  {id:'varsel-faktisk',text:'Appen kan se, at en vagt er ændret i den importerede plan. Den kan ikke se, hvornår ledelsen varslede ændringen.'},
+  {id:'pf-deltid',text:'79.01 § 4 stk. 3 siger to fridøgn pr. uge og nævner ikke, at antallet sættes ned ved deltid.'}
+];
+let ovView='maaned',ovDate='',rulPos=null;
+function planBucket(s){
+  if(!s)return null;
+  if(s.type==='ferie')return 'Ferie';
+  if(s.type==='afspad')return 'Afsp';
+  if(s.type==='fridogn')return 'PF';
+  if(s.type==='arbfri')return 'Fri';
+  if(s.type==='syg')return 'Syg';
+  if(s.type==='kursus')return 'Kursus';
+  return null;
+}
+function markName(s){const k=shiftKind(s);if(!k)return '';return k.k==='anden'?'Anden':k.label;}
+function dayMark(ds){
+  const day=(compute().byDate[ds])||{shifts:[],devs:[]};
+  const works=day.shifts.filter(isWork);
+  const kinds=[];
+  for(const s of works){const n=markName(s);if(n&&!kinds.includes(n))kinds.push(n);}
+  let label='';
+  if(kinds.length)label=kinds.length>1?kinds[0]+'+':kinds[0];
+  else{const order=['Ferie','Afsp','PF','Fri','Syg','Kursus'];const got=day.shifts.map(planBucket);label=order.find(x=>got.includes(x))||'';}
+  const note=Object.values(S.notes||{}).some(n=>n&&n.date===ds&&String(n.text||'').trim());
+  return {label,note,dev:!!(day.devs&&day.devs.length),kinds};
+}
+function weekStartMs(ds){const ms=parseLD(ds);return ms-((wd(ms)+6)%7)*D;}
+function dayWarnings(ds){
+  const day=(compute().byDate[ds])||{shifts:[],devs:[]};
+  const works=day.shifts.filter(isWork);
+  const got=new Set(day.shifts.map(planBucket).filter(Boolean));
+  const out=[];
+  if(works.length&&got.has('PF'))out.push({level:'warn',ok:'fridoegn',text:'Både vagt og fridøgn (PF) denne dag. Inddrages fridøgnet, gælder 79.01 § 9: overarbejde, mindst 6 timer; under 14 døgns varsel desuden 452,48 kr. (31/3 2000-niveau), 470,00 kr. fra 1.4.2027. Appen kan ikke se varslet.'});
+  if(works.length&&got.has('Fri'))out.push({level:'info',ok:'arbejdsfri',text:'Både vagt og arbejdsfri dag (AD/Fri). Teksterne har ingen særskilt sats for det. Ikke afklaret – spørg TR/løn.'});
+  if(works.length&&got.has('Ferie'))out.push({level:'info',ok:'ferie',text:'Både vagt og ferie. 79.01 § 3 stk. 5 handler om timetal, ikke om betaling for vagt i ferien. Ikke afklaret – spørg TR/løn.'});
+  let varsel=false;
+  for(const s of works){
+    if(varsel||!s.planChangedAt||!s.start)continue;
+    const startUtc=lToUtc(parseLIso(s.start)),ch=Date.parse(s.planChangedAt);
+    if(!isNaN(ch)&&startUtc-ch<4*D){varsel=true;out.push({level:'warn',ok:'omlaegning',text:'Vagten er ændret i planen mindre end 4 døgn før start. Hvis varslet var under 4 døgn, kan der være tillæg efter 79.01 § 7: 30,85 kr. pr. omlagt time (31/3 2000-niveau). Husk varselstillæg – afklar med løn. Appen kender ikke ledelsens varsel.'});}
+  }
+  for(const w of dayRests(ds))out.push({level:w.ok?'info':'warn',ok:'hviletid',text:(w.ok?'Inden for den registrerede fravigelse: ':'Under 11 timer: ')+fmtH(w.hours)+' timers hvile. 79.02 § 2 og 64.12a § 5: kan nedsættes til 8 timer, højst 2 gange pr. uge og ikke to døgn i træk, kun med skriftlig aftale.'});
+  return out;
+}
+function warnHtml(list){return list.map(w=>`<div class="${w.level==='warn'?'warnbox':'infobox'}">${w.level==='warn'?'⚠':'ⓘ'} ${esc(w.text)} <button type="button" class="small" data-ok="${w.ok}">Læs i overenskomst</button></div>`).join('');}
+function noteTargets(ds){
+  const day=(compute().byDate[ds])||{shifts:[]};
+  const rows=day.shifts.filter(s=>isWork(s));
+  if(!rows.length)return [{id:'dag:'+ds,vagt:'Ingen vagt'}];
+  return rows.map(s=>({id:s.id,vagt:noteVagtLabel(s)}));
+}
+function noteVagtLabel(s){if(!s)return '';return s.allDay?(s.summary||'Heldag'):(s.summary||'Vagt')+' '+(s.start?tRange(s):'');}
+function upsertNote(id,date,vagt,text){
+  if(!S.notes)S.notes={};
+  const t=String(text||'').trim();
+  if(!t){delete S.notes[id];return;}
+  const prev=S.notes[id],now=new Date().toISOString();
+  S.notes[id]={id,date,vagt:vagt||'',text:t,created:prev&&prev.created||now,updated:now};
+}
+function notesSorted(from,to){
+  return Object.values(S.notes||{}).filter(n=>n&&String(n.text||'').trim()&&(!from||n.date>=from)&&(!to||n.date<=to))
+    .sort((a,b)=>(b.date+(b.updated||'')).localeCompare(a.date+(a.updated||''))||String(b.id).localeCompare(String(a.id)));
+}
+function notesText(list){if(!list.length)return 'Ingen hændelsesnoter i perioden.';return list.map(n=>fmtDate(n.date)+(n.vagt?' · '+n.vagt:'')+'\n'+n.text).join('\n\n');}
+function notesCsv(list){const rows=[['Dato','Vagt','Note','Opdateret']];for(const n of list)rows.push([n.date,n.vagt||'',n.text,n.updated||'']);return '\uFEFF'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n');}
+function hnRange(){const f=$('#hnFrom'),t=$('#hnTo');return {from:f&&f.value||'',to:t&&t.value||''};}
+function renderHaendelser(){
+  const el=$('#hnList');if(!el)return;
+  const {from,to}=hnRange();
+  const list=notesSorted(from,to);
+  el.innerHTML=list.length?list.map(n=>`<div class="devitem"><div class="grow"><b>${fmtDate(n.date)}</b> <span class="small muted">${esc(n.vagt||'')}</span><br>${esc(n.text).replace(/\n/g,'<br>')}</div><button type="button" class="small" data-ovdate="${n.date}">Åbn dag</button></div>`).join(''):'<p class="muted">Ingen noter i perioden. Noten skrives på dagen under Oversigt → Dag eller i kalenderen.</p>';
+}
+function noteFieldsHtml(ds){
+  let h='<h3>Hændelsesnote</h3><p class="small muted">Til TR og arbejdsmiljø. Skriv ikke navne eller CPR-numre. Dato og vagt er udfyldt. Gemmes kun på enheden.</p>';
+  for(const t of noteTargets(ds)){
+    const id='note:'+t.id,n=(S.notes||{})[id];
+    h+=`<label class="small">${fmtDate(ds)} · ${esc(t.vagt)}</label><textarea data-hn="${esc(id)}" data-hnd="${ds}" data-hnv="${esc(t.vagt)}" rows="3">${n?esc(n.text):''}</textarea>`;
+  }
+  h+='<div class="row" style="margin-top:6px"><button type="button" class="small" id="btnSaveNotes">Gem hændelsesnoter</button></div>';
+  return h;
+}
+function bindNoteSave(root,ds){
+  const b=$('#btnSaveNotes',root);if(!b)return;
+  b.onclick=()=>{$$('[data-hn]',root).forEach(t=>upsertNote(t.dataset.hn,t.dataset.hnd,t.dataset.hnv,t.value));save();toast('Hændelsesnote gemt');renderAll();if($('#dayModal').classList.contains('on'))openDay(ds);};
+}
+function dagHtml(ds){
+  const day=(compute().byDate[ds])||{shifts:[],devs:[],planned:0,actual:[]};
+  let h=`<div class="row"><button type="button" class="small" id="ovPrev">‹</button><h3 class="grow" style="margin:0;text-transform:capitalize">${DAYS[wd(parseLD(ds))]} ${fmtDate(ds)}</h3><button type="button" class="small" id="ovNext">›</button></div>`;
+  if(holidayName(ds))h+=`<div class="small" style="color:var(--err)">${esc(holidayName(ds))}</div>`;
+  if(!day.shifts.length)h+='<p class="muted small">Ingen vagt i planen.</p>';
+  for(const s of day.shifts){const kd=shiftKind(s),b=planBucket(s);h+=`<div class="devitem"><div class="grow"><b>${esc(s.summary)}</b> ${kindBadge(kd)} ${b&&!kd?`<span class="lb mk-${b}">${b}</span>`:''}<br>${s.allDay?'Hele dagen':tRange(s)+' · '+fmtH(s.hours)+' t'}</div></div>`;}
+  h+=warnHtml(dayWarnings(ds));
+  if(day.devs&&day.devs.length){h+='<h3>Afvigelser</h3>';for(const v of day.devs)h+=`<div class="small"><b>${esc(v.type)}</b> ${v.from?esc(v.from)+'–'+esc(v.to):fmtH(devHours(v))+' t'} ${esc(v.note||'')}</div>`;}
+  const tl=day.actual?dayTillaeg(day):null;
+  if(tl)h+=`<h3>Tillæg denne dag</h3><p class="small">Aften ${fmtH(tl.eve.h)} t · nat ${fmtH(tl.night.h)} t · lørdag ${fmtH(tl.sat.h)} t · søn-/helligdag ${fmtH(tl.sh.h)} t. Satser: 79.01 § 13 (fra 1.1.2026: 36 / 40 / 32 / 50 % af timelønnen).</p>`;
+  h+=noteFieldsHtml(ds);
+  return h;
+}
+function ugeHtml(ds){
+  const start=weekStartMs(ds);
+  let h=`<div class="row"><button type="button" class="small" id="ovPrev">‹</button><h3 class="grow" style="margin:0">Uge ${isoWeek(start).w} · ${fmtDate(lDate(start))}–${fmtDate(lDate(start+6*D))}</h3><button type="button" class="small" id="ovNext">›</button></div>`;
+  for(let i=0;i<7;i++){
+    const d=lDate(start+i*D),day=(compute().byDate[d])||{shifts:[]},m=dayMark(d);
+    const times=day.shifts.filter(s=>!s.allDay).map(tRange).join(', ');
+    const freed=day.shifts.filter(s=>s.allDay).map(s=>s.summary).join(', ');
+    h+=`<div class="uge-line" data-ovdate="${d}"><b>${DAYS_S[wd(parseLD(d))]} ${fmtDateS(d)}</b><span class="lb mk-${m.label||'Anden'}">${m.label||'–'}</span><span class="grow small">${esc(times||freed||'')}</span>${m.note?'<span class="dot dot-n" title="Hændelsesnote"></span>':''}${m.dev?'<span class="dot dot-a" title="Afvigelse"></span>':''}</div>`;
+  }
+  return h;
+}
+function maanedHtml(){
+  const y=cur.y,m=cur.m,first=L(y,m,1),start=first-((wd(first)+6)%7)*D,last=L(y,m+1,1)-D,today=todayL();
+  let h='<div class="ovgrid"><div class="hd">man</div><div class="hd">tir</div><div class="hd">ons</div><div class="hd">tor</div><div class="hd">fre</div><div class="hd">lør</div><div class="hd">søn</div>';
+  for(let ms=start;ms<=last;ms+=D){
+    const ds=lDate(ms),out=new Date(ms).getUTCMonth()+1!==m,mk=dayMark(ds);
+    h+=`<div class="ovcell${out?' out':''}${ds===today?' today':''}" data-ovdate="${ds}"><span class="n">${new Date(ms).getUTCDate()}</span><span class="dots">${mk.note?'<i class="dot dot-n"></i>':''}${mk.dev?'<i class="dot dot-a"></i>':''}</span>${mk.label?`<span class="lb mk-${mk.label.replace('+','')}">${esc(mk.label)}</span>`:''}</div>`;
+  }
+  h+='</div><p class="small muted">Dag, Aften og Nat følger vagtens klokkeslæt (også tæt på 7:30–15:30, 15:00–23:00 og 22:45–07:45). PF er fridøgn, søgnehelligdagsfri eller PF i titlen. Fri er arbejdsfri dag, AD, stregdag eller nuldag. Lilla prik = hændelsesnote. Rød prik = afvigelse.</p>';
+  return h;
+}
+function renderOv(){
+  const box=$('#ovTop');if(!box)return;
+  if(!ovDate)ovDate=todayL();
+  $$('#ovSwitch button').forEach(b=>b.classList.toggle('on',b.dataset.ov===ovView));
+  box.innerHTML=ovView==='dag'?dagHtml(ovDate):ovView==='uge'?ugeHtml(ovDate):maanedHtml();
+  const prev=$('#ovPrev'),next=$('#ovNext');
+  if(prev)prev.onclick=()=>{ovDate=ovView==='uge'?lDate(weekStartMs(ovDate)-7*D):addDays(ovDate,-1);const ms=parseLD(ovDate);cur={y:new Date(ms).getUTCFullYear(),m:new Date(ms).getUTCMonth()+1};renderAll();};
+  if(next)next.onclick=()=>{ovDate=ovView==='uge'?lDate(weekStartMs(ovDate)+7*D):addDays(ovDate,1);const ms=parseLD(ovDate);cur={y:new Date(ms).getUTCFullYear(),m:new Date(ms).getUTCMonth()+1};renderAll();};
+  bindNoteSave(box,ovDate);
+}
+function rulAnchor(){const s=S.settings.rulStart;const base=s||(Object.values(S.shifts).map(x=>x.date).sort()[0])||todayL();return weekStartMs(base);}
+function rulSpan(index){
+  const weeks=Math.max(1,+S.settings.rulWeeks||6);
+  const a=rulAnchor()+index*weeks*7*D;
+  return {from:lDate(a),to:lDate(a+weeks*7*D-D),weeks,index};
+}
+function rulIndexFor(ds){const weeks=Math.max(1,+S.settings.rulWeeks||6);return Math.floor((parseLD(ds)-rulAnchor())/(weeks*7*D));}
+function rulStats(p){
+  const r={dag:0,aften:0,nat:0,anden:0,hours:0,pf:0,ad:0,ferie:0,afspDays:0,covered:0,days:p.weeks*7,devs:{},afspSat:0,afspSh:0,warns:[]};
+  for(let d=parseLD(p.from);d<=parseLD(p.to);d+=D){
+    const ds=lDate(d),day=compute().byDate[ds];
+    if(!day||!day.shifts.length)continue;
+    r.covered++;
+    const seen={dag:0,aften:0,nat:0,anden:0};
+    for(const s of day.shifts){
+      if(isWork(s)){r.hours+=s.hours||0;const k=shiftKind(s);if(k)seen[k.k]=1;}
+      const b=planBucket(s);
+      if(b==='PF')r.pf++;else if(b==='Fri')r.ad++;else if(b==='Ferie')r.ferie++;else if(b==='Afsp')r.afspDays++;
+    }
+    r.dag+=seen.dag;r.aften+=seen.aften;r.nat+=seen.nat;r.anden+=seen.anden;
+    if(day.actual){const tl=dayTillaeg(day);r.afspSat+=tl.sat.pctH;r.afspSh+=tl.sh.pctH;}
+    for(const v of day.devs||[])r.devs[v.type]=(r.devs[v.type]||0)+devHours(v);
+    r.warns.push(...dayWarnings(ds).filter(w=>w.level==='warn').map(w=>ds+': '+w.text));
+  }
+  r.norm=normFor(p.from,p.to);
+  r.pfTarget=2*p.weeks;
+  return r;
+}
+function renderRul(){
+  const w=$('#rulWeeks'),st=$('#rulStart'),n=$('#rulNorm');
+  if(w&&document.activeElement!==w)w.value=S.settings.rulWeeks||6;
+  if(st&&document.activeElement!==st)st.value=S.settings.rulStart||'';
+  if(n&&document.activeElement!==n)n.value=S.settings.norm||37;
+  if(rulPos==null)rulPos=rulIndexFor(todayL());
+  const p=rulSpan(rulPos),s=rulStats(p);
+  $('#rulTitle').textContent=fmtDate(p.from)+' – '+fmtDate(p.to)+' ('+p.weeks+' uger)';
+  const norm=s.norm?fmtH(s.norm.norm)+' t':'–';
+  const sh=s.norm&&s.norm.shCount?` Heraf er ${s.norm.shCount} søgnehelligdag${s.norm.shCount>1?'e':''} trukket fra med ${fmtH(normWeek()/5)} t pr. dag (79.01 § 3 stk. 6${S.settings.nightFixed?'':', 24/12 med, fordi du ikke er fast nattevagt, § 5 stk. 1'}).`:'';
+  let h=`<div class="kpis">
+    <div class="kpi"><b>${s.dag}</b><span>Dagvagter</span></div>
+    <div class="kpi"><b>${s.aften}</b><span>Aftenvagter</span></div>
+    <div class="kpi"><b>${s.nat}</b><span>Nattevagter</span></div>
+    <div class="kpi"><b>${s.anden}</b><span>Andre vagter</span></div>
+    <div class="kpi"><b>${fmtH(s.hours)} t</b><span>Planlagte timer</span></div>
+    <div class="kpi"><b>${norm}</b><span>Norm (${fmtH(normWeek())} t/uge × ${p.weeks})</span></div>
+    <div class="kpi"><b>${s.pf} af ${s.pfTarget}</b><span>Fridøgn/PF (2 pr. uge, 79.01 § 4 stk. 3)</span></div>
+    <div class="kpi"><b>${s.ad}</b><span>Arbejdsfri dage (AD) – intet måltal</span></div>
+    <div class="kpi"><b>${s.ferie}</b><span>Feriedage</span></div>
+    <div class="kpi"><b>${s.afspDays}</b><span>Afspadseringsdage i planen</span></div>
+  </div>`;
+  h+=`<p class="small">Normen er ansættelsesgrad × uger, minus 7,4 timer (forholdsmæssigt) pr. søgnehelligdag. ${sh} Ferie er ikke trukket fra: det afhænger af lokal model a eller b (79.01 § 3 stk. 5). <b>Ikke afklaret – spørg TR/løn</b>, hvilken model I bruger.</p>`;
+  h+=`<p class="small">Fridøgn tælles som dage, planen har mærket fridøgn, PF, søgnehelligdagsfri eller personlig fri. Aftalen måler selve friheden i timer (55–64 eller mindst 35/32), ikke kun som en dato (79.01 § 4 stk. 3).${normWeek()&&normWeek()<37?' Ved deltid siger teksten ikke, at antallet af fridøgn bliver mindre. <b>Ikke afklaret – spørg TR/løn</b>.':''}</p>`;
+  h+=`<div class="infobox">Arbejdsfri dage (AD): planen har <b>${s.ad}</b>. Teksterne giver ikke et "burde"-antal. <b>Ikke afklaret – spørg TR/løn</b>.</div>`;
+  h+='<h3>Afspadsering i rullen</h3><ul class="small">';
+  h+=`<li>Dage i planen mærket afspadsering: ${s.afspDays}</li>`;
+  h+=`<li>Afvigelse, afspadsering: ${fmtH(s.devs['Afspadsering']||0)} t</li>`;
+  h+=`<li>Afvigelse, overarbejde: ${fmtH(s.devs['Overarbejde']||0)} t (79.01 § 11: 1:1,5 eller timeløn + 50 %)</li>`;
+  h+=`<li>Afvigelse, ekstravagt: ${fmtH(s.devs['Ekstravagt']||0)} t</li>`;
+  if(S.settings.lokalWeekendAfsp)h+=`<li>Weekendtillæg omregnet til afspadsering (lokalaftale, hjemmel 79.01 § 13 stk. 1): lørdag ${fmtH(s.afspSat)} t, søn-/helligdag ${fmtH(s.afspSh)} t</li>`;
+  h+='</ul>';
+  if(s.covered<s.days)h+=`<p class="small muted">Planen dækker ${s.covered} af ${s.days} dage i rullen. Tomme dage tælles ikke med.</p>`;
+  const top=s.warns.slice(0,8);
+  h+=top.length?'<h3>Advarsler i rullen</h3>'+top.map(t=>`<div class="warnbox">${esc(t)}</div>`).join(''):'<div class="okbox">Ingen advarsler i de dage, planen dækker.</div>';
+  $('#rulBody').innerHTML=h;
+}
+function renderUklar(){const el=$('#uklarListe');if(!el)return;el.innerHTML=UNCLEAR.map(u=>`<p class="small"><b>Ikke afklaret – spørg TR/løn.</b> ${esc(u.text)}</p>`).join('');}
 function renderSummary(){
+  renderOv();
   const r=monthStats(cur.y,cur.m);const st=S.settings;
   $('#printHead').textContent=[st.name,st.job,st.place].filter(Boolean).join(' · ');
   const k=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
@@ -1075,6 +1416,8 @@ function openDay(ds){
   if(!day.shifts.length)h+='<p class="muted small">Ingen vagt i vagtplanen.</p>';
   for(const s of day.shifts){const t=typeInfo(s.type);h+=`<div class="devitem" style="border-left:5px solid ${t.color}"><div class="grow"><b>${esc(s.summary)}</b><br>${s.allDay?'Hele dagen':tRange(s)+(s.end.slice(0,10)!==s.date?' (til næste dag)':'')+' · '+fmtH(s.hours)+' t'}${s.corrected?'<br><span class="small muted">Tid rettet for dobbelt tidszone-forskydning</span>':''}</div></div>`;}
   for(const w of dayRests(ds))h+=`<div class="${w.ok?'infobox':'warnbox'}">${w.ok?'ⓘ':'⚠'} Kun ${fmtH(w.hours)} timers hviletid før denne vagt (fra ${fmtDateS(lDate(w.from))} kl. ${lTime(w.from)}) – ${esc(restText(w))}. Vejledende.</div>`;
+  h+=warnHtml(dayWarnings(ds).filter(w=>w.ok!=='hviletid'));
+  h+=noteFieldsHtml(ds);
   h+='<h3>Afvigelser</h3>';
   if(!day.devs.length)h+='<p class="muted small">Ingen afvigelser.</p>';
   for(const v of day.devs){const sg=devSign(v);h+=`<div class="devitem" style="border-left:5px solid ${DEV_COLORS[v.type]||'#7a5af8'}"><div class="grow"><b>${esc(v.type)}</b> ${v.from?esc(v.from)+'–'+esc(v.to):''} · ${fmtH(devHours(v))} t (${sg>0?'+':sg<0?'−':'0'})${v.note?'<br><span class="small">'+esc(v.note)+'</span>':''}</div><button class="small" data-edit="${v.id}">Ret</button><button class="small danger" data-del="${v.id}">Slet</button></div>`;}
@@ -1101,6 +1444,7 @@ function openDay(ds){
   if($('#fCancel'))$('#fCancel').onclick=()=>{editDev=null;openDay(ds);};
   $$('[data-edit]',$('#dayBox')).forEach(b=>b.onclick=()=>{editDev=b.dataset.edit;openDay(ds);const t=$('#devFormTitle');if(t&&t.scrollIntoView)t.scrollIntoView({behavior:'smooth'});});
   $$('[data-del]',$('#dayBox')).forEach(b=>b.onclick=async()=>{if(await uiConfirm('Slet denne afvigelse?')){delete S.devs[b.dataset.del];save();renderAll();openDay(ds);}});
+  bindNoteSave($('#dayBox'),ds);
 }
 function closeDay(){$('#dayModal').classList.remove('on');editDev=null;}
 
@@ -1477,15 +1821,15 @@ async function restore(text,skipConfirm){
   let o;try{o=JSON.parse(text);}catch(e){$('#bkResult').innerHTML='<div class="errbox">Filen er ikke en gyldig backup.</div>';return;}
   if(!o||o.app!=='vagtapp'||!o.data){$('#bkResult').innerHTML='<div class="errbox">Filen er ikke en backup fra denne app.</div>';return;}
   if(!skipConfirm&&Object.keys(S.shifts).length&&!(await uiConfirm('Gendan backup? Dine nuværende vagter, afvigelser og indstillinger bliver erstattet af backuppens.')))return;
-  S={shifts:o.data.shifts||{},devs:o.data.devs||{},meta:o.data.meta||{},settings:deepMerge(freshSettings(),o.data.settings||{})};migrate(o.data.settings||{});save();
+  S={shifts:o.data.shifts||{},devs:o.data.devs||{},notes:o.data.notes||{},meta:o.data.meta||{},settings:deepMerge(freshSettings(),o.data.settings||{})};migrate(o.data.settings||{});save();
   let n=0;if(o.docs&&o.docs.length){try{await dbClear();for(const d of o.docs){const bin=atob(d.b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);await dbPut({id:d.id,cat:d.cat,name:d.name,type:d.type,size:d.size,added:d.added,blob:new Blob([u],{type:d.type})});n++;}}catch(e){console.warn(e);}}
-  $('#bkResult').innerHTML=`<div class="okbox">Backup gendannet: ${Object.keys(S.shifts).length} vagter, ${Object.keys(S.devs).length} afvigelser, ${n} dokumenter.</div>`;goToday();showTab('kalender');quickMsg(`<div class="okbox" id="quickOk" style="font-size:16px;padding:12px"><b>✔ Backup gendannet: ${kindStats().total} vagter lagt ind</b></div>`);askPersist();
+  $('#bkResult').innerHTML=`<div class="okbox">Backup gendannet: ${Object.keys(S.shifts).length} vagter, ${Object.keys(S.devs).length} afvigelser, ${Object.keys(S.notes||{}).length} hændelsesnoter, ${n} dokumenter.</div>`;goToday();showTab('kalender');quickMsg(`<div class="okbox" id="quickOk" style="font-size:16px;padding:12px"><b>✔ Backup gendannet: ${kindStats().total} vagter lagt ind</b></div>`);askPersist();
 }
 
 /* ===== Opsætning ===== */
 let tab='kalender';
 function showTab(t){tab=t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.section').forEach(s=>s.classList.toggle('hide',s.id!=='sec-'+t));renderAll();if(window.scrollTo)try{window.scrollTo(0,0);}catch(e){}}
-function renderAll(){renderHeader();if(tab==='kalender')renderCal();if(tab==='liste')renderList();if(tab==='oversigt')renderSummary();if(tab==='indstillinger')renderSettings();
+function renderAll(){renderHeader();if(tab==='kalender')renderCal();if(tab==='liste')renderList();if(tab==='oversigt')renderSummary();if(tab==='haendelser')renderHaendelser();if(tab==='rul')renderRul();if(tab==='overenskomst')renderUklar();if(tab==='indstillinger')renderSettings();
   if(tab==='backup'&&!$('#icsFrom').value){const ds=Object.values(S.shifts).map(s=>s.date).sort();if(ds.length){$('#icsFrom').value=ds[0];$('#icsTo').value=ds[ds.length-1];}}
   renderGoogleUi();}
 function shiftMonth(n){cur.m+=n;if(cur.m<1){cur.m=12;cur.y--;}if(cur.m>12){cur.m=1;cur.y++;}renderAll();}
@@ -1509,7 +1853,7 @@ function init(){
   $('#btnBackup').onclick=backup;
   $('#bkFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(String(r.result));r.readAsText(f);e.target.value='';};
   $('#btnClearShifts').onclick=async()=>{if(await uiConfirm('Slet alle importerede vagter? Afvigelser og dokumenter bevares.')){S.shifts={};save();renderAll();toast('Vagter slettet');}};
-  $('#btnClearAll').onclick=async()=>{if(await uiConfirm('Slet ALT i appen på denne enhed? Det kan ikke fortrydes, medmindre du har en backup.')){try{localStorage.removeItem(KEY);}catch(e){}await idbStateDel();try{await dbClear();}catch(e){}S={shifts:{},devs:{},settings:freshSettings(),meta:{}};googleCals=null;_gToken='';_gTokenAt=0;invalidate();renderAll();toast('Alt slettet');}};
+  $('#btnClearAll').onclick=async()=>{if(await uiConfirm('Slet ALT i appen på denne enhed? Det kan ikke fortrydes, medmindre du har en backup.')){try{localStorage.removeItem(KEY);}catch(e){}await idbStateDel();try{await dbClear();}catch(e){}S={shifts:{},devs:{},notes:{},settings:freshSettings(),meta:{}};googleCals=null;_gToken='';_gTokenAt=0;invalidate();renderAll();toast('Alt slettet');}};
   $$('[data-gconnect]').forEach(b=>b.onclick=()=>connectGoogle());
   $$('[data-gsync]').forEach(b=>b.onclick=()=>syncFromGoogle({silent:false}));
   const gsel=$('#googleCal');if(gsel)gsel.onchange=()=>{
@@ -1521,10 +1865,33 @@ function init(){
     save();
     syncFromGoogle({silent:false,calendarId:id});
   };
+  const setHn=(from,to)=>{$('#hnFrom').value=from;$('#hnTo').value=to;renderHaendelser();};
+  $('#hnMonth').onclick=()=>{const t=todayL();setHn(addDays(t,-30),t);};
+  $('#hnQuarter').onclick=()=>{const t=todayL();setHn(addDays(t,-91),t);};
+  $('#hnYear').onclick=()=>{const t=todayL();setHn(addDays(t,-365),t);};
+  $('#hnAll').onclick=()=>setHn('','');
+  $('#hnFrom').onchange=renderHaendelser;$('#hnTo').onchange=renderHaendelser;
+  const hnListNow=()=>notesSorted($('#hnFrom').value,$('#hnTo').value);
+  $('#hnCopy').onclick=async()=>{try{await navigator.clipboard.writeText(notesText(hnListNow()));$('#hnMsg').textContent='Teksten er kopieret.';}catch(e){$('#hnMsg').textContent='Kunne ikke kopiere. Hent .txt i stedet.';}};
+  $('#hnShare').onclick=async()=>{const text=notesText(hnListNow());try{if(navigator.share){await navigator.share({title:'Hændelsesnoter',text});$('#hnMsg').textContent='Delt.';return;}}catch(e){if(e&&e.name==='AbortError')return;}$('#hnMsg').textContent='Deling er ikke mulig her. Brug kopiér eller hent fil.';};
+  $('#hnTxt').onclick=()=>dl(new Blob([notesText(hnListNow())],{type:'text/plain;charset=utf-8'}),'haendelser.txt');
+  $('#hnCsv').onclick=()=>dl(new Blob([notesCsv(hnListNow())],{type:'text/csv;charset=utf-8'}),'haendelser.csv');
+  const saveRulFields=()=>{S.settings.rulWeeks=Math.max(1,+$('#rulWeeks').value||6);S.settings.rulStart=$('#rulStart').value||'';if($('#rulNorm').value!=='')S.settings.norm=$('#rulNorm').value;rulPos=null;save();renderRul();};
+  $('#rulWeeks').onchange=saveRulFields;$('#rulStart').onchange=saveRulFields;$('#rulNorm').onchange=saveRulFields;
+  $('#rulPrev').onclick=()=>{if(rulPos==null)rulPos=rulIndexFor(todayL());rulPos--;renderRul();};
+  $('#rulNext').onclick=()=>{if(rulPos==null)rulPos=rulIndexFor(todayL());rulPos++;renderRul();};
+  document.body.addEventListener('click',e=>{
+    const sw=e.target.closest('[data-ov]');
+    if(sw&&sw.dataset.ov){ovView=sw.dataset.ov;if(tab!=='oversigt')showTab('oversigt');else renderAll();return;}
+    const d=e.target.closest('[data-ovdate]');
+    if(d){ovDate=d.dataset.ovdate;ovView='dag';showTab('oversigt');return;}
+    const ok=e.target.closest('[data-ok]');
+    if(ok){closeDay();showTab('overenskomst');const el=document.getElementById('ok-'+ok.dataset.ok);if(el){el.open=true;try{el.scrollIntoView({block:'start'});}catch(err){}}}
+  });
   pwaInit();
   renderAll();
 }
-window.VagtApp={get S(){return S;},handleFile,doImport,compute,monthStats,buildIcs,monthCsv,csvToRecords,parseIcs,icsToRecords,openDay,closeDay,showTab,setMonth:(y,m)=>{cur={y,m};renderAll();},holidays,specialDays,holidayName,periodHours,ratesFor,satWindow,normFor,avg4m,shiftKind,kindStats,weekendOverview,holdFor,timeloen,roundHalf,load,save,backupObj,restore,renderAll,quickImportText,uiConfirm,loadIdb,get STORE(){return STORE;},googleEventsToIcs,googleEventsToRecords,mergeShiftRecords,googleConfigured,pickDefaultCalendar,fetchGoogleEvents,fetchGoogleCalendars,googleApiList,googleFixOpts,GOOGLE_CLIENT_ID,GOOGLE_CALENDAR_SCOPE};
+window.VagtApp={get S(){return S;},handleFile,doImport,compute,monthStats,buildIcs,monthCsv,csvToRecords,parseIcs,icsToRecords,openDay,closeDay,showTab,setMonth:(y,m)=>{cur={y,m};renderAll();},holidays,specialDays,holidayName,periodHours,ratesFor,satWindow,normFor,avg4m,shiftKind,kindStats,weekendOverview,holdFor,timeloen,roundHalf,load,save,backupObj,restore,renderAll,quickImportText,uiConfirm,loadIdb,get STORE(){return STORE;},googleEventsToIcs,googleEventsToRecords,mergeShiftRecords,googleConfigured,pickDefaultCalendar,fetchGoogleEvents,fetchGoogleCalendars,googleApiList,googleFixOpts,GOOGLE_CLIENT_ID,GOOGLE_CALENDAR_SCOPE,dayMark,dayWarnings,planBucket,rulStats,rulSpan,notesSorted,notesText,notesCsv,upsertNote,UNCLEAR,shiftContentKey};
 init();
 </script>
 </body>
